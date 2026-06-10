@@ -1,0 +1,5 @@
+node_modules
+.next
+payload.db
+payload.db-journal
+public/media

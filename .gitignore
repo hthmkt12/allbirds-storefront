@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+payload-cms/node_modules/
+e2e-tests/node_modules/
+
+# Build output
+dist/
+payload-cms/dist/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Logs
+*.log
+vite-preview.log
+vite-preview.err.log
+
+# Payload CMS database (local only)
+payload-cms/payload.db
+payload-cms/payload.db-shm
+payload-cms/payload.db-wal
+
+# Payload CMS media uploads
+payload-cms/media/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Misc
+.wrangler/
+tmp/
+test-debug.js

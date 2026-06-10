@@ -1,0 +1,32 @@
+{
+  "name": "payload-cms",
+  "version": "1.0.0",
+  "description": "Payload CMS Backend for Allbirds Storefront",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "payload generate:importmap && next build",
+    "start": "next start",
+    "seed": "cross-env PAYLOAD_SECRET=fallback-secret-for-development-only-replace-in-production tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@payloadcms/db-sqlite": "^3.8.0",
+    "@payloadcms/next": "^3.8.0",
+    "@payloadcms/richtext-lexical": "^3.8.0",
+    "graphql": "^16.8.1",
+    "next": "^15.1.0",
+    "payload": "^3.8.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "cross-env": "^7.0.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4"
+  }
+}

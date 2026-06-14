@@ -234,5 +234,63 @@ After every bug fix, append a new entry using this format:
 - Files changed: `e2e-tests/tests/tier5-adversarial.spec.ts`.
 
 ### Verification
-- `npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier5-adversarial.spec.ts --workers=1`
+- npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier5-adversarial.spec.ts --workers=1
 - Result: 15/15 passed (Chromium, Mobile Chrome, Mobile Safari).
+
+## 2026-06-14 - Strict Mode Selector Violation for Bag Button in E2E Tests
+
+### Symptoms
+- E2E tests executing actions on the bag icon (e.g. `should open cart drawer when clicking bag icon` in `f2-cart-drawer.spec.ts`, or cross-feature / real-world tests) failed with: `Error: locator.click: Error: strict mode violation: locator('button[aria-label="Bag"]') resolved to 2 elements`.
+
+### Root Cause
+- The storefront header header-hero (`SiteHeader` component) rendered two separate buttons with `aria-label="Bag"` in the DOM (one for desktop layout and one for mobile layout). Playwright locator `button[aria-label="Bag"]` matched both, violating strict mode selection.
+
+### Common Triggers
+- Running E2E tests that attempt to locate or click `button[aria-label="Bag"]` without scoped CSS selectors or hierarchy qualifiers.
+
+### Solutions
+- Modified `SiteHeader` in `src/components/header-hero.tsx` to conditionally render the desktop actions (`.nav-actions`) or the mobile actions (`.nav-mobile-actions`) based on an `isMobile` React state matched to the media query breakpoint (920px). This ensures only a single bag button is present in the DOM at any given screen width.
+
+### Verification
+- Ran `npx playwright test e2e-tests/tests/f2-cart-drawer.spec.ts` successfully (30/30 tests passed in Chromium, Mobile Chrome, and Mobile Safari).
+
+---
+
+## 2026-06-14 - PDP options selection and navigation selector mismatch
+
+### Symptoms
+- E2E tests failed with mismatched text or missing elements for selected size labels, out-of-stock size buttons, low stock warnings, and PDP route navigation.
+
+### Root Cause
+- The storefront was missing PDP route/view rendering, product card click navigation handlers, stop click propagation on swatches/images, and the product option labels/attributes did not match E2E assertions exactly.
+
+### Common Triggers
+- Running E2E tests that assert on product details, size selection labels, out-of-stock attributes, and PDP details.
+
+### Solutions
+- Implemented `ProductDetailView` with local size guide modal state.
+- Bound click handler on outer product card with `e.stopPropagation()` on swatch dots and images.
+- Updated size labels to `Selected Size: ${selectedSize}`, stock warnings to `Only ${count} left`, and added the `disabled` class/attribute to out-of-stock size buttons.
+- Configured client-side routing and paths inside `App.tsx`.
+
+### Verification
+- Executed `npm run test:e2e -- e2e-tests/tests/f1-product-options.spec.ts` successfully (30/30 tests passed in Chromium, Mobile Chrome, and Mobile Safari).
+
+## 2026-06-14 - E2E Search Modal Selector and Close Gesture Mismatch
+
+### Symptoms
+- E2E tests for tier4-real-world and tier5-adversarial failed because the search modal was not found and could not be closed.
+
+### Root Cause
+- The storefront search modal was refactored into the `<SearchDialog>` component (Phase 5), changing the class name from `.search-modal` to `.search-dialog`. In addition, the close behavior was updated to respond to the Escape key instead of the Enter key.
+
+### Common Triggers
+- Running E2E tests that perform product search and assert on the search dialog's visibility.
+
+### Solutions
+- Updated `e2e-tests/tests/tier4-real-world.spec.ts` and `e2e-tests/tests/tier5-adversarial.spec.ts` to use the `.search-dialog` selector.
+- Changed the keyboard gesture from `Enter` to `Escape` in these test files to match the SearchDialog close action.
+
+### Verification
+- Ran `npx playwright test -c e2e-tests/playwright.config.ts --project=chromium` and verified all 86 tests passed.
+

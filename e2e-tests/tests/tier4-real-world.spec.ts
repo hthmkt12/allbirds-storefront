@@ -105,15 +105,15 @@ test.describe('Tier 4: Real-World User Scenarios', () => {
     await searchBtn.click();
 
     // 2. Perform search input strictly
-    const searchModal = page.locator('.search-modal');
-    await expect(searchModal).toBeVisible();
-    const searchInput = searchModal.locator('input');
+    const searchDialog = page.locator('.search-dialog');
+    await expect(searchDialog).toBeVisible();
+    const searchInput = searchDialog.locator('input');
     await expect(searchInput).toBeVisible();
     await expect(searchInput).toHaveValue('');
     await searchInput.fill('Dasher');
     await expect(searchInput).toHaveValue('Dasher');
-    await page.keyboard.press('Enter');
-    await expect(searchModal).not.toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(searchDialog).not.toBeVisible();
 
     // 3. Scroll and locate product card in arrivals
     const arrivals = page.locator('#new-arrivals');

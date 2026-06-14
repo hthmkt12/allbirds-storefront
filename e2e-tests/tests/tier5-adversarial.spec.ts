@@ -6,24 +6,24 @@ test.describe('Tier 5: Adversarial and Hardening Scenarios', () => {
   });
 
   test('should handle malicious search input tags without executing or breaking layout', async ({ page }) => {
-    // Open search modal
+    // Open search dialog
     const searchBtn = page.locator('button[aria-label="Search"]');
     await expect(searchBtn).toBeVisible();
     await searchBtn.click();
 
-    const searchModal = page.locator('.search-modal');
-    await expect(searchModal).toBeVisible();
+    const searchDialog = page.locator('.search-dialog');
+    await expect(searchDialog).toBeVisible();
 
-    const searchInput = searchModal.locator('input');
+    const searchInput = searchDialog.locator('input');
     await expect(searchInput).toBeVisible();
 
     // Type a script injection payload
     const maliciousPayload = '<script>alert("XSS-Test")</script>';
     await searchInput.fill(maliciousPayload);
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('Escape');
 
-    // Verify search modal closes and payload was handled safely without executing/alerting
-    await expect(searchModal).not.toBeVisible();
+    // Verify search dialog closes and payload was handled safely without executing/alerting
+    await expect(searchDialog).not.toBeVisible();
   });
 
   test('should handle corrupted JSON in local storage cart state gracefully', async ({ page, context }) => {

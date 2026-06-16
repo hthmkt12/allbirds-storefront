@@ -75,12 +75,20 @@ test.describe('F7: Customer Account & Order History', () => {
     const prefilledValue = await checkoutEmailInput.inputValue();
     expect(prefilledValue).toBe('test-customer@example.com');
 
-    // 9. Fill in the rest of shipping details
+    // 9. Fill in the rest of shipping details and transition to payment step
     await page.locator('input#checkout-fullName').fill('Jane Doe');
     await page.locator('input#checkout-address').fill('123 Wooly Way');
     await page.locator('input#checkout-city').fill('San Francisco');
     await page.locator('input#checkout-state').fill('CA');
     await page.locator('input#checkout-zip').fill('94107');
+
+    // Click Continue to Payment
+    await page.locator('button:has-text("Continue to Payment")').click();
+
+    // Fill payment details (Credit Card is selected by default)
+    await page.locator('input#checkout-cardNumber').fill('4111111111111111');
+    await page.locator('input#checkout-cardExpiry').fill('12/30');
+    await page.locator('input#checkout-cardCvv').fill('123');
 
     // Get order total to verify later
     const totalText = await page.locator('.checkout-totals div:has-text("Total") span').last().innerText();

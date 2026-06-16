@@ -294,3 +294,26 @@ After every bug fix, append a new entry using this format:
 ### Verification
 - Ran `npx playwright test -c e2e-tests/playwright.config.ts --project=chromium` and verified all 86 tests passed.
 
+## 2026-06-16 - Payment Gateway Integration validation and E2E failures
+
+### Symptoms
+- E2E tests for `e2e-tests/tests/f8-payment-gateway.spec.ts` failed on invalid card number validations.
+- E2E tests for `e2e-tests/tests/f7-customer-account.spec.ts` failed on placing orders with a timeout waiting for the "Place Order" button.
+
+### Root Cause
+- Credit card inputs in `CheckoutView` validated required fields and returned early before running format checks (Luhn, CVV length, Expiry date), blocking validation error display if Expiry or CVV were empty.
+- The test card number `1234567812345670` in `f8-payment-gateway.spec.ts` was actually a mathematically valid Luhn number, causing format validation to pass instead of showing the expected "Invalid Card Number" error.
+- The addition of the "Payment Method" step split the checkout page into a two-step wizard, breaking the single-page assumptions of the older `f7-customer-account.spec.ts` E2E test which attempted to click "Place Order" before clicking "Continue to Payment" and filling card details.
+
+### Common Triggers
+- Running E2E payment tests or checking input validations for partial card details.
+
+### Solutions
+- Modified card validation logic in `src/components/checkout-view.tsx` to collect required and format validation errors in a single step instead of returning early.
+- Changed test card number in `e2e-tests/tests/f8-payment-gateway.spec.ts` to `1234567812345678` which is invalid under the Luhn algorithm.
+- Updated `e2e-tests/tests/f7-customer-account.spec.ts` checkout flow to navigate through the two-step wizard by clicking "Continue to Payment" and filling in mock card details before submitting.
+
+### Verification
+- Ran `npx playwright test -c e2e-tests/playwright.config.ts --project=chromium` and verified all 107 tests passed successfully.
+
+

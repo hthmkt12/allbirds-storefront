@@ -51,7 +51,7 @@ async function seed() {
     'allbirds-travel-promo.png',
   ]
 
-  const mediaMap: Record<string, string> = {}
+  const mediaMap: Record<string, any> = {}
 
   for (const name of imageNames) {
     const filePath = path.join(mediaSourceDir, name)
@@ -123,7 +123,10 @@ async function seed() {
       tags: ["Canvas", "Lightweight"],
       categorySlug: "mens",
       image: "allbirds-hero-linen.png",
-      sizes: [8, 9, 10, 11, 12]
+      sizes: [8, 9, 10, 11, 12],
+      gender: "men" as const,
+      badge: "Best Seller",
+      description: "Lightweight canvas upper meets our signature SweetFoam sole. Built for everyday comfort.",
     },
     {
       name: "Women's Tree Glider",
@@ -135,7 +138,10 @@ async function seed() {
       tags: ["Tree Fiber", "Breathable"],
       categorySlug: "womens",
       image: "allbirds-mvp-lifestyle.png",
-      sizes: [6, 7, 8, 9, 10]
+      sizes: [6, 7, 8, 9, 10],
+      gender: "women" as const,
+      badge: "New",
+      description: "Breathable tree-fiber knit designed for warm-weather commutes and weekend adventures.",
     },
     {
       name: "Men's Canvas Cruiser",
@@ -147,7 +153,9 @@ async function seed() {
       tags: ["Canvas", "Travel"],
       categorySlug: "mens",
       image: "allbirds-crop-bottom-left.png",
-      sizes: [8, 9, 10, 11, 12]
+      sizes: [8, 9, 10, 11, 12],
+      gender: "men" as const,
+      description: "Laid-back canvas slip-on with a relaxed fit perfect for travel days.",
     },
     {
       name: "Women's Breezer Mary Jane",
@@ -159,7 +167,9 @@ async function seed() {
       tags: ["Mary Jane", "Breezy"],
       categorySlug: "womens",
       image: "allbirds-crop-bottom-right.png",
-      sizes: [6, 7, 8, 9, 10]
+      sizes: [6, 7, 8, 9, 10],
+      gender: "women" as const,
+      description: "Classic Mary Jane silhouette with an airy knit upper for all-day breathability.",
     },
     {
       name: "Men's Dasher NZ",
@@ -171,7 +181,9 @@ async function seed() {
       tags: ["Running", "Cushioned"],
       categorySlug: "mens",
       image: "allbirds-lifestyle-hero.png",
-      sizes: [8, 9, 10, 11, 12]
+      sizes: [8, 9, 10, 11, 12],
+      gender: "men" as const,
+      description: "Performance running shoe with extra cushioning and a supportive heel counter.",
     },
     {
       name: "Women's Varsity Strap",
@@ -183,7 +195,9 @@ async function seed() {
       tags: ["Retro", "Everyday"],
       categorySlug: "womens",
       image: "allbirds-mvp-lifestyle.png",
-      sizes: [6, 7, 8, 9, 10]
+      sizes: [6, 7, 8, 9, 10],
+      gender: "women" as const,
+      description: "Retro-inspired strap sneaker with an adjustable fit for everyday wear.",
     },
     {
       name: "Men's Cruiser Slip On Terry",
@@ -195,7 +209,9 @@ async function seed() {
       tags: ["Terry", "Travel"],
       categorySlug: "mens",
       image: "allbirds-crop-bottom-right.png",
-      sizes: [8, 9, 10, 11, 12]
+      sizes: [8, 9, 10, 11, 12],
+      gender: "men" as const,
+      description: "Soft terry-cloth lining meets a slip-on silhouette for effortless style.",
     },
     {
       name: "Women's Canvas Cruiser",
@@ -207,7 +223,9 @@ async function seed() {
       tags: ["Canvas", "Low Profile"],
       categorySlug: "womens",
       image: "allbirds-crop-bottom-left.png",
-      sizes: [6, 7, 8, 9, 10]
+      sizes: [6, 7, 8, 9, 10],
+      gender: "women" as const,
+      description: "Low-profile canvas sneaker in fresh seasonal colorways.",
     },
   ]
 
@@ -234,7 +252,10 @@ async function seed() {
             swatch: prod.swatch,
             image: mediaMap[prod.image] || mediaMap['allbirds-crop-top-left.png']
           }
-        ]
+        ],
+        gender: prod.gender,
+        description: prod.description,
+        ...(prod.badge ? { badge: prod.badge } : {}),
       }
     })
     seededProducts.push(createdProd)

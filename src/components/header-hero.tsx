@@ -10,27 +10,86 @@ type HeroProps = {
 
 export function SiteHeader({
   onBagClick,
-  onSearchClick
+  onSearchClick,
+  onAccountClick,
+  onHelpClick,
+  onNavigate,
 }: {
   onBagClick?: () => void;
   onSearchClick?: () => void;
+  onAccountClick?: () => void;
+  onHelpClick?: () => void;
+  onNavigate?: (path: string) => void;
 } = {}) {
+  const handleNav = (path: string) => {
+    onNavigate?.(path);
+  };
+
   return (
     <header className="site-header">
       <div className="announcement">Free Shipping on Orders over $150. Easy Returns.</div>
       <nav className="top-nav floating" aria-label="Primary navigation">
-        <a className="brand script" href="#top">allbirds</a>
+        <a
+          className="brand script"
+          href="#top"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNav("/");
+          }}
+        >
+          allbirds
+        </a>
         <div className="nav-links">
-          <a href="#new-arrivals">Men</a>
-          <a href="#new-arrivals">Women</a>
-          <a href="#sale">Sale</a>
-          <a href="#payload">Payload</a>
+          <a
+            href="#new-arrivals"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNav("/collections/mens#new-arrivals");
+            }}
+          >
+            Men
+          </a>
+          <a
+            href="#new-arrivals"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNav("/collections/womens#new-arrivals");
+            }}
+          >
+            Women
+          </a>
+          <a
+            href="#sale"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNav("/#sale");
+            }}
+          >
+            Sale
+          </a>
+          <a
+            href="#payload"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNav("/#payload");
+            }}
+          >
+            Payload
+          </a>
         </div>
         <div className="nav-actions">
-          <a href="#about">About</a>
+          <a
+            href="#about"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNav("/#about");
+            }}
+          >
+            About
+          </a>
           <button className="icon-button" aria-label="Search" onClick={onSearchClick}><Search size={17} /></button>
-          <button className="icon-button" aria-label="Account"><UserCircle size={18} /></button>
-          <button className="icon-button" aria-label="Help"><CircleHelp size={18} /></button>
+          <button className="icon-button" aria-label="Account" onClick={onAccountClick}><UserCircle size={18} /></button>
+          <button className="icon-button" aria-label="Help" onClick={onHelpClick}><CircleHelp size={18} /></button>
           <button className="icon-button" aria-label="Bag" onClick={onBagClick}><ShoppingBag size={18} /></button>
         </div>
       </nav>
@@ -78,4 +137,3 @@ export function Hero({ audience, onAudienceChange }: HeroProps) {
     </section>
   );
 }
-

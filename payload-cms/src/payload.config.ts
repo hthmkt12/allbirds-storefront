@@ -13,6 +13,7 @@ import { Products } from './collections/Products'
 import { Materials } from './collections/Materials'
 import { Reviews } from './collections/Reviews'
 import { PromoTiles } from './collections/PromoTiles'
+import { Orders } from './collections/Orders'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,6 +34,7 @@ export default buildConfig({
     Materials,
     Reviews,
     PromoTiles,
+    Orders,
   ],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || 'fallback-secret-for-development-only-replace-in-production',

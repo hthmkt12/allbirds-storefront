@@ -136,4 +136,133 @@ test.describe('F1: Product Options Selection and Details', () => {
     await expect(lowStockWarning).toBeVisible();
     await expect(lowStockWarning).toHaveText(/Only \d+ left/i);
   });
+
+  test('should add product to cart from PDP, update quantity in cart drawer, and display details correctly', async ({ page }) => {
+    // 1. Navigate to the PDP for Men's Canvas Runner NZ directly
+    await page.goto('/products/men-s-canvas-runner-nz');
+
+    // 2. Verify we are on the PDP for this product
+    const pdpTitle = page.locator('.pdp-details-column h1');
+    await expect(pdpTitle).toHaveText("Men's Canvas Runner NZ");
+
+    // 3. Select size 9
+    const sizeBtn = page.locator('button.size-button:has-text("9")');
+    await expect(sizeBtn).toBeVisible();
+    await sizeBtn.click({ force: true });
+
+    // 4. Increase quantity to 2 on PDP
+    const plusBtn = page.locator('.quantity-selector button.plus');
+    await expect(plusBtn).toBeVisible();
+    await plusBtn.click({ force: true });
+    const quantityVal = page.locator('.quantity-selector .quantity-value');
+    await expect(quantityVal).toHaveText('2');
+
+    // 5. Click Add to Bag
+    const addToBagBtn = page.locator('button.add-to-bag-btn');
+    await expect(addToBagBtn).toBeVisible();
+    await addToBagBtn.click({ force: true });
+
+    // 6. Verify cart drawer opens and updates correctly
+    const cartDrawer = page.locator('.cart-drawer');
+    await expect(cartDrawer).toBeVisible();
+    
+    const cartItem = cartDrawer.locator('.cart-item');
+    await expect(cartItem).toHaveCount(1);
+    await expect(cartItem.locator('.item-name')).toHaveText("Men's Canvas Runner NZ");
+    await expect(cartItem.locator('.item-size')).toHaveText("Size: 9");
+    await expect(cartItem.locator('.quantity-value')).toHaveText("2");
+    
+    const subtotal = cartDrawer.locator('.cart-subtotal');
+    await expect(subtotal).toHaveText('$200');
+  });
+
+  test('should change card style/color on swatch click and image click but not trigger URL change', async ({ page }) => {
+    // 1. Go to homepage
+    await page.goto('/');
+    const initialUrl = page.url();
+
+    // 2. Locate first product card and initial color text
+    const productCard = page.locator('.product-card').first();
+    await expect(productCard).toBeVisible();
+    const colorText = productCard.locator('p').first();
+    const initialColor = await colorText.textContent();
+    expect(initialColor).not.toBeNull();
+
+    // 3. Click the swatch container to change the active colorway
+    const swatch = productCard.locator('.product-swatch');
+    await expect(swatch).toBeVisible();
+    await swatch.click();
+
+    // Verify color changed and URL is still the initial URL
+    const secondColor = await colorText.textContent();
+    expect(secondColor).not.toBeNull();
+    expect(secondColor).not.toEqual(initialColor);
+    expect(page.url()).toEqual(initialUrl);
+
+    // 4. Click the product image (nested inside the product-swatch)
+    const productImg = productCard.locator('.product-crop');
+    await expect(productImg).toBeVisible();
+    await productImg.click();
+
+    // Verify color changed again and URL remains initial URL
+    const thirdColor = await colorText.textContent();
+    expect(thirdColor).not.toBeNull();
+    expect(thirdColor).not.toEqual(secondColor);
+    expect(page.url()).toEqual(initialUrl);
+  });
+
+  test('should render fallback view on invalid product route and redirect to home on button click', async ({ page }) => {
+    // Navigate to invalid product route
+    await page.goto('/products/invalid-slug-123');
+
+    // Verify fallback view renders instead of crashing
+    const fallbackView = page.locator('.pdp-not-found');
+    await expect(fallbackView).toBeVisible();
+    await expect(fallbackView.locator('h2')).toHaveText('Product Not Found');
+
+    // Click button to redirect to /
+    const returnBtn = fallbackView.locator('button:has-text("Return to Storefront")');
+    await expect(returnBtn).toBeVisible();
+    await returnBtn.click({ force: true });
+
+    // Expect redirection to home page /
+    await expect(page).toHaveURL(/.*\/$/);
+  });
+
+  test('should handle quantity selector increments, decrements, and enforce a minimum of 1 on PDP', async ({ page }) => {
+    // Navigate directly to a valid product page
+    await page.goto('/products/men-s-canvas-runner-nz');
+
+    // Locate quantity controls
+    const quantityVal = page.locator('.quantity-selector .quantity-value');
+    const plusBtn = page.locator('.quantity-selector button.plus');
+    const minusBtn = page.locator('.quantity-selector button.minus');
+
+    await expect(quantityVal).toHaveText('1');
+
+    // Try to decrement below 1
+    await minusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('1');
+
+    // Increment to 2
+    await plusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('2');
+
+    // Increment to 3
+    await plusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('3');
+
+    // Decrement back to 2
+    await minusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('2');
+
+    // Decrement back to 1
+    await minusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('1');
+
+    // Decrement again, should stay at 1
+    await minusBtn.click({ force: true });
+    await expect(quantityVal).toHaveText('1');
+  });
 });
+

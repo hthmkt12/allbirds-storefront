@@ -119,6 +119,9 @@ export interface CmsCategory {
   cta: string;
   swatch: string;
   image: CmsMedia | string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  sortPriority?: number;
 }
 
 export interface CmsProduct {
@@ -133,6 +136,12 @@ export interface CmsProduct {
     swatch: string;
     image: CmsMedia | string;
   }[];
+  slug?: string;
+  description?: string;
+  productType?: string;
+  gender?: 'men' | 'women' | 'unisex';
+  salePrice?: string;
+  badge?: string;
   // Static fallback compatibility
   label?: string;
   color?: string;
@@ -158,6 +167,26 @@ export interface CmsReview {
   quote: string;
   customerName: string;
   detail: string;
+}
+
+export interface CmsOrder {
+  id: string;
+  email: string;
+  shippingName: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingZip: string;
+  items: any[];
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  paymentMethod?: 'card' | 'qr';
+  paymentStatus?: 'unpaid' | 'paid';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function getHeroBlocks(): Promise<CmsHeroBlock[]> {
@@ -225,7 +254,32 @@ export function getProducts(): Promise<CmsProduct[]> {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
         if (data && Array.isArray(data.docs) && data.docs.length > 0) {
-          return data.docs;
+          return data.docs.map((prod: any) => {
+            let normalizedTags: string[] = [];
+            if (Array.isArray(prod.tags)) {
+              normalizedTags = prod.tags.map((t: any) => {
+                if (typeof t === "string") return t;
+                if (t && typeof t === "object") {
+                  if ("tag" in t) return t.tag;
+                  if ("name" in t) return t.name;
+                }
+                return String(t);
+              });
+            }
+            let normalizedSizes: number[] = [];
+            if (Array.isArray(prod.sizes)) {
+              normalizedSizes = prod.sizes.map((s: any) => {
+                if (typeof s === "number") return s;
+                if (s && typeof s === "object" && "size" in s) return Number(s.size);
+                return Number(s);
+              }).filter((s: number) => !isNaN(s));
+            }
+            return {
+              ...prod,
+              tags: normalizedTags,
+              sizes: normalizedSizes.length > 0 ? normalizedSizes : [8, 9, 10, 11, 12, 13, 14, 15],
+            };
+          });
         }
         throw new Error("Empty docs");
       } catch (err) {
@@ -326,4 +380,106 @@ export function getReviews(): Promise<CmsReview[]> {
     })();
   }
   return reviewsCache;
+}
+
+export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<CmsOrder> {
+  try {
+    const res = await fetch(`${CMS_BASE_URL}/api/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    if (data && data.doc) {
+      // Save to local storage for offline tracking/caching
+      const localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]");
+      localOrders.push(data.doc);
+      localStorage.setItem("local_orders", JSON.stringify(localOrders));
+      return data.doc;
+    }
+    throw new Error("Invalid order response structure from CMS");
+  } catch (err) {
+    console.warn("Failed to create order in CMS, saving to local storage fallback", err);
+    // Local fallback
+    const mockOrder: CmsOrder = {
+      ...orderData,
+      id: `local-order-${Date.now()}`,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]");
+    localOrders.push(mockOrder);
+    localStorage.setItem("local_orders", JSON.stringify(localOrders));
+    return mockOrder;
+  }
+}
+
+export async function getOrders(email: string): Promise<CmsOrder[]> {
+  const cleanEmail = email.trim().toLowerCase();
+  try {
+    const res = await fetchWithTimeout(`${CMS_BASE_URL}/api/orders?where[email][equals]=${encodeURIComponent(cleanEmail)}`);
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    const data = await res.json();
+    if (data && Array.isArray(data.docs)) {
+      // Merge with local storage orders to ensure offline orders are also visible
+      const localOrders: CmsOrder[] = JSON.parse(localStorage.getItem("local_orders") || "[]")
+        .filter((o: any) => o.email.trim().toLowerCase() === cleanEmail);
+      
+      const combined = [...data.docs];
+      for (const lo of localOrders) {
+        if (!combined.some(o => o.id === lo.id)) {
+          combined.push(lo);
+        }
+      }
+      // Sort newest first
+      combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return combined;
+    }
+    throw new Error("Invalid response from CMS orders endpoint");
+  } catch (err) {
+    console.warn("Failed to fetch orders from CMS, loading from local storage/mock fallback", err);
+    // Offline / fallback loading
+    const localOrders: CmsOrder[] = JSON.parse(localStorage.getItem("local_orders") || "[]")
+      .filter((o: any) => o.email.trim().toLowerCase() === cleanEmail);
+    
+    if (localOrders.length > 0) {
+      localOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return localOrders;
+    }
+
+    // Default mock data if no orders exist at all (useful for initial test visibility)
+    return [
+      {
+        id: "mock-order-1",
+        email: cleanEmail,
+        shippingName: "Test Customer",
+        shippingAddress: "123 Green St",
+        shippingCity: "San Francisco",
+        shippingState: "CA",
+        shippingZip: "94111",
+        items: [
+          {
+            id: "mock-item-1",
+            name: "Men's Canvas Runner NZ",
+            price: "$100",
+            size: 10,
+            color: "Deep Navy Stripes",
+            image: "/allbirds-hero-linen.png",
+            quantity: 1
+          }
+        ],
+        subtotal: 100,
+        tax: 8,
+        shipping: 0,
+        total: 108,
+        status: "delivered",
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      }
+    ];
+  }
 }

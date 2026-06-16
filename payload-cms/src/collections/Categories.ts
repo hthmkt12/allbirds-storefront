@@ -36,5 +36,18 @@ export const Categories: CollectionConfig = {
       relationTo: 'media',
       required: true,
     },
+    {
+      name: 'heroTitle',
+      type: 'text',
+    },
+    {
+      name: 'heroSubtitle',
+      type: 'text',
+    },
+    {
+      name: 'sortPriority',
+      type: 'number',
+      defaultValue: 0,
+    },
   ],
 }

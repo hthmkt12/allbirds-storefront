@@ -103,5 +103,43 @@ export const Products: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'slug',
+      type: 'text',
+      admin: {
+        description: 'Auto-generated from name if left empty',
+      },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+    },
+    {
+      name: 'productType',
+      type: 'text',
+      admin: {
+        description: 'e.g. shoes, apparel',
+      },
+    },
+    {
+      name: 'gender',
+      type: 'select',
+      options: [
+        { label: 'Men', value: 'men' },
+        { label: 'Women', value: 'women' },
+        { label: 'Unisex', value: 'unisex' },
+      ],
+    },
+    {
+      name: 'salePrice',
+      type: 'text',
+    },
+    {
+      name: 'badge',
+      type: 'text',
+      admin: {
+        description: 'e.g. New, Best Seller',
+      },
+    },
   ],
 }

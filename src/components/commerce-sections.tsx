@@ -226,7 +226,7 @@ function SpotlightCard({ activeCategory, audience }: { activeCategory: string; a
   );
 }
 
-function ProductCard({ 
+export function ProductCard({ 
   product, 
   isFirstProduct,
   onAddToCart,

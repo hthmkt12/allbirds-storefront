@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getProducts, CmsProduct } from "../utils/cms-client";
 import { ProductCard } from "./commerce-sections";
 import { FilterSortBar, FilterState, SortKey, applyFiltersAndSort } from "./filter-sort-bar";
+import { SizeGuideModal } from "./size-guide-modal";
 
 // Map collection slugs to display labels and audience filters
 const COLLECTION_META: Record<
@@ -120,57 +121,7 @@ export function ProductListingPage({
         )}
       </div>
 
-      {/* Size Guide Modal */}
-      {isSizeGuideOpen && (
-        <div
-          className="size-guide-modal-overlay"
-          onClick={() => setIsSizeGuideOpen(false)}
-          role="dialog"
-          aria-label="Size Guide"
-          aria-modal="true"
-        >
-          <div
-            className="size-guide-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>Size Guide</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>US</th>
-                  <th>UK</th>
-                  <th>EU</th>
-                  <th>CM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["8", "7", "41", "26"],
-                  ["9", "8", "42", "27"],
-                  ["10", "9", "43", "28"],
-                  ["11", "10", "44", "29"],
-                  ["12", "11", "45", "30"],
-                  ["13", "12", "46", "31"],
-                ].map(([us, uk, eu, cm]) => (
-                  <tr key={us}>
-                    <td>{us}</td>
-                    <td>{uk}</td>
-                    <td>{eu}</td>
-                    <td>{cm}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              type="button"
-              className="pill-button close-modal"
-              onClick={() => setIsSizeGuideOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
     </main>
   );
 }

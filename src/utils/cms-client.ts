@@ -5,8 +5,9 @@ import {
   valueBlocks as mockValueBlocks, 
   reviews as mockReviews 
 } from "../data/allbirds-data";
+import { CMS_BASE_URL, DEFAULT_SIZES } from "./commerce-config";
 
-export const CMS_BASE_URL = "http://127.0.0.1:3000";
+export { CMS_BASE_URL };
 
 let heroBlocksCache: Promise<CmsHeroBlock[]> | null = null;
 let categoriesCache: Promise<CmsCategory[]> | null = null;
@@ -277,7 +278,7 @@ export function getProducts(): Promise<CmsProduct[]> {
             return {
               ...prod,
               tags: normalizedTags,
-              sizes: normalizedSizes.length > 0 ? normalizedSizes : [8, 9, 10, 11, 12, 13, 14, 15],
+              sizes: normalizedSizes.length > 0 ? normalizedSizes : DEFAULT_SIZES,
             };
           });
         }
@@ -294,7 +295,7 @@ export function getProducts(): Promise<CmsProduct[]> {
           color: prod.color,
           swatch: prod.swatch,
           image: prod.image,
-          sizes: [8, 9, 10, 11, 12, 13, 14, 15],
+          sizes: DEFAULT_SIZES,
           colorways: [
             { color: prod.color || "Natural Sand", swatch: prod.swatch || "var(--sand)", image: prod.image || "/allbirds-crop-top-left.png" },
             { color: "Sage Brush", swatch: "var(--sage)", image: "/allbirds-mvp-lifestyle.png" },

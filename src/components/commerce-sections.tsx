@@ -11,6 +11,8 @@ import {
 } from "../utils/cms-client";
 import { valueBlocks } from "../data/allbirds-data";
 import { ResponsiveImage } from "./responsive-image";
+import { SizeGuideModal } from "./size-guide-modal";
+import { DEFAULT_SIZES } from "../utils/commerce-config";
 
 
 
@@ -128,75 +130,7 @@ export function ProductSection({
         ))}
       </div>
 
-      {isSizeGuideOpen && (
-        <div className="size-guide-modal-overlay" onClick={() => setIsSizeGuideOpen(false)} style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div className="size-guide-modal" onClick={(e) => e.stopPropagation()} style={{
-            background: 'var(--canvas)',
-            padding: '32px',
-            borderRadius: '8px',
-            border: '1px solid var(--charcoal)',
-            maxWidth: '500px',
-            width: '90%',
-            position: 'relative'
-          }}>
-            <h2 style={{ fontFamily: 'var(--serif)', fontSize: '28px', marginBottom: '16px' }}>Size Guide</h2>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--charcoal)' }}>
-                  <th style={{ textAlign: 'left', padding: '8px' }}>US Size</th>
-                  <th style={{ textAlign: 'left', padding: '8px' }}>UK Size</th>
-                  <th style={{ textAlign: 'left', padding: '8px' }}>EU Size</th>
-                  <th style={{ textAlign: 'left', padding: '8px' }}>CM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { us: '8', uk: '7', eu: '41', cm: '26' },
-                  { us: '9', uk: '8', eu: '42', cm: '27' },
-                  { us: '10', uk: '9', eu: '43', cm: '28' },
-                  { us: '11', uk: '10', eu: '44', cm: '29' },
-                  { us: '12', uk: '11', eu: '45', cm: '30' },
-                  { us: '13', uk: '12', eu: '46', cm: '31' },
-                  { us: '14', uk: '13', eu: '47', cm: '32' },
-                  { us: '15', uk: '14', eu: '48', cm: '33' }
-                ].map((row) => (
-                  <tr key={row.us} style={{ borderBottom: '1px solid var(--line)' }}>
-                    <td style={{ padding: '8px' }}>{row.us}</td>
-                    <td style={{ padding: '8px' }}>{row.uk}</td>
-                    <td style={{ padding: '8px' }}>{row.eu}</td>
-                    <td style={{ padding: '8px' }}>{row.cm}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button 
-              type="button" 
-              className="close-modal pill-button" 
-              onClick={() => setIsSizeGuideOpen(false)}
-              style={{
-                width: '100%',
-                background: 'var(--charcoal)',
-                color: 'var(--canvas)',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
     </section>
   );
 }
@@ -262,7 +196,7 @@ export function ProductCard({
     label = "\u00a0";
   }
 
-  const sizes = [8, 9, 10, 11, 12, 13, 14, 15];
+  const sizes = DEFAULT_SIZES;
 
   return (
     <article className="product-card">

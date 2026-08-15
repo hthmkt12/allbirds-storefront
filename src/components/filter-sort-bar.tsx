@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 import { CmsProduct } from "../utils/cms-client";
+import { DEFAULT_SIZES } from "../utils/commerce-config";
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "rating-desc" | "name-asc";
 
@@ -27,7 +28,7 @@ function deriveOptions(products: CmsProduct[]) {
   let maxPrice = 0;
 
   for (const p of products) {
-    (p.sizes || [8, 9, 10, 11, 12, 13]).forEach((s) => sizes.add(s));
+    (p.sizes || DEFAULT_SIZES).forEach((s) => sizes.add(s));
     const cws = p.colorways && p.colorways.length ? p.colorways : [{ color: p.color || "" }];
     cws.forEach((cw: any) => cw.color && colors.add(cw.color));
     (p.tags || []).forEach((t) => tags.add(t));
@@ -49,7 +50,7 @@ export function applyFiltersAndSort(
   sort: SortKey
 ): CmsProduct[] {
   let result = products.filter((p) => {
-    const pSizes = p.sizes && p.sizes.length ? p.sizes : [8, 9, 10, 11, 12, 13];
+    const pSizes = p.sizes && p.sizes.length ? p.sizes : DEFAULT_SIZES;
     if (filters.sizes.length > 0 && !filters.sizes.some((s) => pSizes.includes(s))) return false;
 
     if (filters.colors.length > 0) {

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Star, Minus, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { getProducts, getMaterials, getImageUrl, CmsProduct, CmsMaterial } from "../utils/cms-client";
 import { ResponsiveImage } from "./responsive-image";
+import { SizeGuideModal } from "./size-guide-modal";
+import { DEFAULT_SIZES } from "../utils/commerce-config";
 
 export interface ProductDetailViewProps {
   slug: string;
@@ -106,7 +108,7 @@ export function ProductDetailView({
 
   // Sizes array - use product.sizes if available, else defaults
   const sizes: number[] =
-    product.sizes && product.sizes.length > 0 ? product.sizes : [8, 9, 10, 11, 12, 13, 14, 15];
+    product.sizes && product.sizes.length > 0 ? product.sizes : DEFAULT_SIZES;
 
   // Simulate 2 out-of-stock sizes (last two)
   const outOfStock = new Set([sizes[sizes.length - 1], sizes[sizes.length - 2]]);
@@ -444,57 +446,7 @@ export function ProductDetailView({
 
       </div>
 
-      {/* Size Guide Modal */}
-      {isSizeGuideOpen && (
-        <div
-          className="size-guide-modal-overlay"
-          onClick={() => setIsSizeGuideOpen(false)}
-          role="dialog"
-          aria-label="Size Guide"
-          aria-modal="true"
-        >
-          <div
-            className="size-guide-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>Size Guide</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>US</th>
-                  <th>UK</th>
-                  <th>EU</th>
-                  <th>CM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["8", "7", "41", "26"],
-                  ["9", "8", "42", "27"],
-                  ["10", "9", "43", "28"],
-                  ["11", "10", "44", "29"],
-                  ["12", "11", "45", "30"],
-                  ["13", "12", "46", "31"],
-                ].map(([us, uk, eu, cm]) => (
-                  <tr key={us}>
-                    <td>{us}</td>
-                    <td>{uk}</td>
-                    <td>{eu}</td>
-                    <td>{cm}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              type="button"
-              className="pill-button close-modal"
-              onClick={() => setIsSizeGuideOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
     </main>
   );
 }

@@ -15,7 +15,7 @@ import { categories } from "./data/allbirds-data";
 import { ProductListingPage } from "./components/product-listing-page";
 import { CartDrawer, CartItem } from "./components/cart-drawer";
 import { ProductDetailView } from "./components/product-detail-view";
-import { CheckoutView } from "./components/checkout-view";
+import { CheckoutView } from "./components/checkout/checkout-view";
 import { SearchDialog } from "./components/search-dialog";
 import { AccountDrawer } from "./components/account-drawer";
 import { HelpDrawer } from "./components/help-drawer";
@@ -237,7 +237,7 @@ export default function App() {
   return (
     <>
       <SiteHeader {...headerProps} />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero audience={audience} onAudienceChange={handleAudienceChange} />
         <CategoryStrip activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
         <ProductSection

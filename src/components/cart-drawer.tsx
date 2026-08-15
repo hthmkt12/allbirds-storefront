@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { ResponsiveImage } from "./responsive-image";
 import { products } from "../data/allbirds-data";
+import { TAX_RATE, FREE_SHIPPING_THRESHOLD } from "../utils/commerce-config";
+import { useDrawerA11y } from "../utils/use-drawer-a11y";
 
 export interface CartItem {
   id: string;
@@ -41,7 +43,7 @@ export function CartDrawer({
 
   // 2. Calculate estimated tax (8%)
   const estimatedTax = useMemo(() => {
-    return subtotal * 0.08;
+    return subtotal * TAX_RATE;
   }, [subtotal]);
 
   // Formatted subtotal for display
@@ -55,6 +57,8 @@ export function CartDrawer({
     return notInCart.slice(0, 2);
   }, [cart]);
 
+  const panelRef = useDrawerA11y(isOpen, onClose);
+
   return (
     <>
       <div
@@ -62,9 +66,11 @@ export function CartDrawer({
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         className={`cart-drawer ${isOpen ? "open" : ""}`}
         role="dialog"
         aria-label="Shopping Cart"
+        aria-modal="true"
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h2 style={{ margin: 0, fontFamily: "var(--serif)" }}>Your Bag</h2>
@@ -133,10 +139,10 @@ export function CartDrawer({
               fontSize: "13px",
               fontWeight: "bold",
             }}>
-              {subtotal >= 150 ? (
+              {subtotal >= FREE_SHIPPING_THRESHOLD ? (
                 "You qualified for free shipping!"
               ) : (
-                `$${(150 - subtotal) % 1 === 0 ? 150 - subtotal : (150 - subtotal).toFixed(2)} away from free shipping`
+                `$${(FREE_SHIPPING_THRESHOLD - subtotal) % 1 === 0 ? FREE_SHIPPING_THRESHOLD - subtotal : (FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} away from free shipping`
               )}
               <div className="progress-bar-track" style={{ height: "4px", background: "#e0e0e0", marginTop: "8px", borderRadius: "2px", overflow: "hidden" }}>
                 <div
@@ -144,7 +150,7 @@ export function CartDrawer({
                   style={{
                     height: "100%",
                     background: "var(--charcoal)",
-                    width: `${Math.min(100, (subtotal / 150) * 100)}%`,
+                    width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100)}%`,
                     transition: "width 0.3s ease",
                   }}
                 />

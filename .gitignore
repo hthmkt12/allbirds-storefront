@@ -33,3 +33,7 @@ payload-cms/media/
 .wrangler/
 tmp/
 test-debug.js
+
+# Local agent tooling artifacts
+.agents/
+.claude/

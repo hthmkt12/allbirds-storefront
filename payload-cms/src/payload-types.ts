@@ -367,6 +367,8 @@ export interface Order {
   shipping: number;
   total: number;
   status?: ('pending' | 'processing' | 'shipped' | 'delivered') | null;
+  paymentMethod: 'card' | 'qr';
+  paymentStatus: 'unpaid' | 'paid';
   updatedAt: string;
   createdAt: string;
 }
@@ -696,6 +698,8 @@ export interface OrdersSelect<T extends boolean = true> {
   shipping?: T;
   total?: T;
   status?: T;
+  paymentMethod?: T;
+  paymentStatus?: T;
   updatedAt?: T;
   createdAt?: T;
 }

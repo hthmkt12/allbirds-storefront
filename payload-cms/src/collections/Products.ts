@@ -9,6 +9,18 @@ export const Products: CollectionConfig = {
     read: () => true,
   },
   hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (data && !data.slug && typeof data.name === 'string') {
+          data.slug = data.name
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+        }
+        return data
+      },
+    ],
     afterRead: [
       ({ doc }) => {
         if (Array.isArray(doc.tags)) {

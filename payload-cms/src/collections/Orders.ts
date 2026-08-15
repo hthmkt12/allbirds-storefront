@@ -8,6 +8,8 @@ export const Orders: CollectionConfig = {
   access: {
     read: () => true,
     create: () => true,
+    update: () => false,
+    delete: () => false,
   },
   fields: [
     {

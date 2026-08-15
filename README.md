@@ -22,11 +22,12 @@ F:/Allbirds/
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, TypeScript |
-| CMS | Payload CMS 3 (Next.js), SQLite |
+| Frontend | React 19, Vite, TypeScript |
+| CMS | Payload CMS 3 (Next.js 15), SQLite |
 | Styling | Vanilla CSS (custom properties) |
 | Images | WebP + AVIF `srcset` at 480/768/1024/1280/1536/1920 px |
 | Tests | Playwright (Chromium, Mobile Chrome, Mobile Safari) |
+| Deployment | Vercel / Cloudflare Pages (Frontend), Node.js (Payload CMS) |
 
 ---
 
@@ -127,6 +128,12 @@ npx playwright test -c e2e-tests/playwright.config.ts --ui
 | `materials` | name, impactNote, textureImage, sourceRegion |
 | `reviews` | quote, customerName, detail |
 | `promoTiles` | title, swatch, image |
+
+---
+
+## Deployment
+
+See [`docs/deployment-guide.md`](docs/deployment-guide.md) for step-by-step instructions on deploying the storefront to **Vercel** / **Cloudflare Pages** and Payload CMS to any Node.js environment.
 
 ---
 

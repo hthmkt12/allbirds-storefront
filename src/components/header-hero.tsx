@@ -1,4 +1,4 @@
-import { CircleHelp, Search, ShoppingBag, UserCircle } from "lucide-react";
+import { CircleHelp, Heart, Search, ShoppingBag, UserCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getHeroBlocks, CmsHeroBlock } from "../utils/cms-client";
 import { ResponsiveImage } from "./responsive-image";
@@ -13,12 +13,16 @@ export function SiteHeader({
   onSearchClick,
   onAccountClick,
   onHelpClick,
+  onWishlistClick,
+  wishlistCount = 0,
   onNavigate,
 }: {
   onBagClick?: () => void;
   onSearchClick?: () => void;
   onAccountClick?: () => void;
   onHelpClick?: () => void;
+  onWishlistClick?: () => void;
+  wishlistCount?: number;
   onNavigate?: (path: string) => void;
 } = {}) {
   const handleNav = (path: string) => {
@@ -89,6 +93,29 @@ export function SiteHeader({
             About
           </a>
           <button className="icon-button" aria-label="Search" onClick={onSearchClick}><Search size={17} /></button>
+          <button className="icon-button" aria-label="Wishlist" onClick={onWishlistClick} style={{ position: "relative" }}>
+            <Heart size={18} />
+            {wishlistCount > 0 && (
+              <span style={{
+                position: "absolute",
+                top: "-4px",
+                right: "-4px",
+                background: "var(--rose, #d1b0a4)",
+                color: "var(--charcoal)",
+                fontSize: "10px",
+                fontWeight: 800,
+                width: "18px",
+                height: "18px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid var(--canvas)",
+              }}>
+                {wishlistCount}
+              </span>
+            )}
+          </button>
           <button className="icon-button" aria-label="Account" onClick={onAccountClick}><UserCircle size={18} /></button>
           <button className="icon-button" aria-label="Help" onClick={onHelpClick}><CircleHelp size={18} /></button>
           <button className="icon-button" aria-label="Bag" onClick={onBagClick}><ShoppingBag size={18} /></button>

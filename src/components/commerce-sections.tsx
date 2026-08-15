@@ -1,4 +1,4 @@
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Heart, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { 
   getCategories, 
@@ -67,11 +67,15 @@ function CategoryCard({ category, selected, onSelect }: {
 export function ProductSection({ 
   activeCategory, 
   audience,
-  onAddToCart
+  onAddToCart,
+  isInWishlist,
+  onToggleWishlist,
 }: { 
   activeCategory: string; 
   audience: string;
   onAddToCart: (item: { name: string; price: string; size: number; color: string; image: string }) => void;
+  isInWishlist?: (name: string) => boolean;
+  onToggleWishlist?: (item: { name: string; price: string; color: string; image: string }) => void;
 }) {
   const [products, setProducts] = useState<CmsProduct[]>([]);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -126,6 +130,8 @@ export function ProductSection({
             isFirstProduct={index === 0}
             onAddToCart={onAddToCart}
             onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+            isWishlisted={isInWishlist?.(product.name)}
+            onToggleWishlist={onToggleWishlist}
           />
         ))}
       </div>
@@ -164,12 +170,16 @@ export function ProductCard({
   product, 
   isFirstProduct,
   onAddToCart,
-  onOpenSizeGuide
+  onOpenSizeGuide,
+  isWishlisted,
+  onToggleWishlist,
 }: { 
   product: CmsProduct; 
   isFirstProduct: boolean;
   onAddToCart: (item: { name: string; price: string; size: number; color: string; image: string }) => void;
   onOpenSizeGuide: () => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (item: { name: string; price: string; color: string; image: string }) => void;
 }) {
   const colorways = product.colorways && product.colorways.length > 0
     ? product.colorways
@@ -199,7 +209,40 @@ export function ProductCard({
   const sizes = DEFAULT_SIZES;
 
   return (
-    <article className="product-card">
+    <article className="product-card" style={{ position: "relative" }}>
+      {onToggleWishlist && (
+        <button
+          type="button"
+          aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleWishlist({
+              name: product.name,
+              price: product.price,
+              color: colorName,
+              image: imageUrl || "/allbirds-crop-top-left.png",
+            });
+          }}
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            background: "var(--canvas)",
+            border: "1px solid var(--line)",
+            borderRadius: "50%",
+            width: "32px",
+            height: "32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 3,
+            color: isWishlisted ? "var(--rose, #d1b0a4)" : "var(--charcoal)",
+          }}
+        >
+          <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+        </button>
+      )}
       <div 
         className="product-swatch" 
         style={{ backgroundColor: swatchColor, cursor: 'pointer' }}

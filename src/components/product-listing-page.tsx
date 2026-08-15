@@ -42,10 +42,14 @@ export function ProductListingPage({
   slug,
   onAddToCart,
   onNavigate,
+  isInWishlist,
+  onToggleWishlist,
 }: {
   slug: string;
   onAddToCart: (item: { name: string; price: string; size: number; color: string; image: string }) => void;
   onNavigate: (path: string) => void;
+  isInWishlist?: (name: string) => boolean;
+  onToggleWishlist?: (item: { name: string; price: string; color: string; image: string }) => void;
 }) {
   const meta = COLLECTION_META[slug] ?? { label: slug, hero: slug, audience: null };
   const [allProducts, setAllProducts] = useState<CmsProduct[]>([]);
@@ -115,6 +119,8 @@ export function ProductListingPage({
                 isFirstProduct={index === 0}
                 onAddToCart={onAddToCart}
                 onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+                isWishlisted={isInWishlist?.(product.name)}
+                onToggleWishlist={onToggleWishlist}
               />
             ))}
           </div>

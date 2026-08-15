@@ -19,6 +19,8 @@ import { CheckoutView } from "./components/checkout/checkout-view";
 import { SearchDialog } from "./components/search-dialog";
 import { AccountDrawer } from "./components/account-drawer";
 import { HelpDrawer } from "./components/help-drawer";
+import { WishlistDrawer } from "./components/wishlist-drawer";
+import { useWishlist } from "./utils/use-wishlist";
 
 export default function App() {
   const [audience, setAudience] = useState("Shop Men");
@@ -69,6 +71,9 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+
+  const { wishlist, toggleWishlist, isInWishlist, removeFromWishlist, count: wishlistCount } = useWishlist();
 
   // Routing State
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -138,6 +143,8 @@ export default function App() {
     onSearchClick: () => setIsSearchOpen(true),
     onAccountClick: () => setIsAccountOpen(true),
     onHelpClick: () => setIsHelpOpen(true),
+    onWishlistClick: () => setIsWishlistOpen(true),
+    wishlistCount,
     onNavigate: navigate,
   };
 
@@ -147,6 +154,14 @@ export default function App() {
       <SearchDialog isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onNavigate={navigate} />
       <AccountDrawer isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <WishlistDrawer
+        isOpen={isWishlistOpen}
+        onClose={() => setIsWishlistOpen(false)}
+        wishlist={wishlist}
+        onRemoveItem={removeFromWishlist}
+        onAddToCart={addToCart}
+        onNavigate={navigate}
+      />
     </>
   );
 
@@ -194,6 +209,8 @@ export default function App() {
           slug={collectionSlug}
           onAddToCart={addToCart}
           onNavigate={navigate}
+          isInWishlist={isInWishlist}
+          onToggleWishlist={toggleWishlist}
         />
         <NewsletterFooter />
         <CartDrawer
@@ -218,6 +235,8 @@ export default function App() {
           slug={productSlug}
           onAddToCart={addToCart}
           onNavigate={navigate}
+          isWishlisted={productSlug ? isInWishlist(productSlug) : false}
+          onToggleWishlist={toggleWishlist}
         />
         <NewsletterFooter />
         <CartDrawer
@@ -244,6 +263,8 @@ export default function App() {
           activeCategory={activeCategory}
           audience={audience}
           onAddToCart={addToCart}
+          isInWishlist={isInWishlist}
+          onToggleWishlist={toggleWishlist}
         />
         <MvpSection />
         <PromoSection />

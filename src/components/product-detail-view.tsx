@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Minus, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Star, Minus, Plus, ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { getProducts, getMaterials, getImageUrl, CmsProduct, CmsMaterial } from "../utils/cms-client";
 import { ResponsiveImage } from "./responsive-image";
 import { SizeGuideModal } from "./size-guide-modal";
@@ -17,6 +17,8 @@ export interface ProductDetailViewProps {
   }) => void;
   onNavigate: (path: string) => void;
   onOpenSizeGuide?: () => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (item: { name: string; price: string; color: string; image: string }) => void;
 }
 
 export function ProductDetailView({
@@ -24,6 +26,8 @@ export function ProductDetailView({
   onAddToCart,
   onNavigate,
   onOpenSizeGuide,
+  isWishlisted,
+  onToggleWishlist,
 }: ProductDetailViewProps) {
   const [product, setProduct] = useState<CmsProduct | null>(null);
   const [materials, setMaterials] = useState<CmsMaterial[]>([]);
@@ -300,37 +304,63 @@ export function ProductDetailView({
             </div>
           </div>
 
-          {/* Add to Bag CTA */}
-          <button
-            type="button"
-            className="pill-button add-to-bag-btn"
-            disabled={!canAdd}
-            style={{
-              width: "100%",
-              padding: "16px",
-              background: "var(--charcoal)",
-              color: "var(--canvas)",
-              border: "none",
-              cursor: canAdd ? "pointer" : "not-allowed",
-              fontWeight: 700,
-              fontSize: "14px",
-              marginTop: "8px"
-            }}
-            onClick={() => {
-              if (canAdd) {
-                onAddToCart({
-                  name: product.name,
-                  price: product.price,
-                  size: selectedSize!,
-                  color: colorName,
-                  image: imageUrl || "/allbirds-crop-top-left.png",
-                  quantity,
-                });
-              }
-            }}
-          >
-            Add to Bag
-          </button>
+          {/* Add to Bag & Wishlist Actions */}
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", marginTop: "8px" }}>
+            <button
+              type="button"
+              className="pill-button add-to-bag-btn"
+              disabled={!canAdd}
+              style={{
+                flex: 1,
+                padding: "16px",
+                background: "var(--charcoal)",
+                color: "var(--canvas)",
+                border: "none",
+                cursor: canAdd ? "pointer" : "not-allowed",
+                fontWeight: 700,
+                fontSize: "14px",
+              }}
+              onClick={() => {
+                if (canAdd) {
+                  onAddToCart({
+                    name: product.name,
+                    price: product.price,
+                    size: selectedSize!,
+                    color: colorName,
+                    image: imageUrl || "/allbirds-crop-top-left.png",
+                    quantity,
+                  });
+                }
+              }}
+            >
+              Add to Bag
+            </button>
+            {onToggleWishlist && (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+                onClick={() => {
+                  onToggleWishlist({
+                    name: product.name,
+                    price: product.price,
+                    color: colorName,
+                    image: imageUrl || "/allbirds-crop-top-left.png",
+                  });
+                }}
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "999px",
+                  border: "1px solid var(--charcoal)",
+                  background: "var(--canvas)",
+                  color: isWishlisted ? "var(--rose, #d1b0a4)" : "var(--charcoal)",
+                }}
+              >
+                <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
+              </button>
+            )}
+          </div>
 
           {/* Accordions Section */}
           <div className="pdp-accordions" style={{ marginTop: "24px", borderTop: "1px solid var(--line)" }}>

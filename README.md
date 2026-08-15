@@ -1,6 +1,12 @@
 # Allbirds Storefront
 
+[![CI & Quality Gate](https://github.com/hthmkt12/allbirds-storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/hthmkt12/allbirds-storefront/actions/workflows/ci.yml)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-black?logo=vercel)](https://allbirds-storefront.vercel.app)
+
 An interactive e-commerce storefront modeled on Allbirds, backed by a local [Payload CMS](https://payloadcms.com/) instance and covered by a comprehensive Playwright E2E test suite.
+
+- **Live Storefront Demo**: [https://allbirds-storefront.vercel.app](https://allbirds-storefront.vercel.app)
+- **GitHub Repository**: [https://github.com/hthmkt12/allbirds-storefront](https://github.com/hthmkt12/allbirds-storefront)
 
 ---
 
@@ -76,6 +82,8 @@ npm run dev          # http://localhost:5173
 | Command | Description |
 |---|---|
 | `npm run dev` | Start Vite dev server |
+| `npm test` | Run Vitest unit tests |
+| `npm run test:watch` | Run Vitest in interactive watch mode |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve production build on port 5173 |
 

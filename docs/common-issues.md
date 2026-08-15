@@ -316,4 +316,22 @@ After every bug fix, append a new entry using this format:
 ### Verification
 - Ran `npx playwright test -c e2e-tests/playwright.config.ts --project=chromium` and verified all 107 tests passed successfully.
 
+## 2026-08-15 - Unhandled preview server lifecycle and stale Playwright connection refused in E2E runs
+
+### Symptoms
+- Playwright E2E test runs for payment gateway and customer account failed with `Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/`.
+
+### Root Cause
+- The Playwright configuration uses `reuseExistingServer: !process.env.CI`. When a build occurs, the local preview server is either not yet running, or a background worker was killed, leaving the port closed while Playwright assumed an existing server was alive.
+
+### Common Triggers
+- Running isolated spec files directly using Playwright CLI without waiting for the webServer hook to complete initialization.
+
+### Solutions
+- Ensured `npm run build` is run prior to E2E execution, allowing Playwright's embedded `webServer` block (`npm run preview -- --port 5173`) to spin up cleanly and serve the fresh production bundle from `dist/`.
+
+### Verification
+- Executed full test suites (`f1`, `f2`, `f6`, `f7`, `f8`, `f9`, `f10`) with all 50 tests passing on chromium.
+
+
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useDrawerA11y } from "../utils/use-drawer-a11y";
 
 interface HelpDrawerProps {
   isOpen: boolean;
@@ -6,15 +6,7 @@ interface HelpDrawerProps {
 }
 
 export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps) {
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
+  const panelRef = useDrawerA11y(isOpen, onClose);
 
   const faqSections = [
     {
@@ -35,9 +27,11 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps) {
     <>
       <div className={`cart-drawer-overlay ${isOpen ? "open" : ""}`} onClick={onClose} />
       <div
+        ref={panelRef}
         className={`help-drawer ${isOpen ? "open" : ""}`}
         role="dialog"
         aria-label="Help"
+        aria-modal="true"
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h2 style={{ margin: 0, fontFamily: "var(--serif)" }}>Help</h2>

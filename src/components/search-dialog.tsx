@@ -17,17 +17,17 @@ export function SearchDialog({ isOpen, onClose, onNavigate }: SearchDialogProps)
   const [products, setProducts] = useState<CmsProduct[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<Element | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Fetch products once on mount
   useEffect(() => {
     getProducts().then(setProducts);
   }, []);
 
-  // Focus management: capture trigger on open, restore on close
+  // Focus management & Trap
   useEffect(() => {
     if (isOpen) {
       triggerRef.current = document.activeElement;
-      // Delay to let dialog render before focusing
       requestAnimationFrame(() => inputRef.current?.focus());
     } else {
       if (triggerRef.current instanceof HTMLElement) {
@@ -37,11 +37,34 @@ export function SearchDialog({ isOpen, onClose, onNavigate }: SearchDialogProps)
     }
   }, [isOpen]);
 
-  // Close on Escape
+  // Trap Tab/Shift+Tab and Escape
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusables = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => el.offsetParent !== null);
+
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -69,9 +92,11 @@ export function SearchDialog({ isOpen, onClose, onNavigate }: SearchDialogProps)
   return (
     <div className="search-dialog-overlay" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="search-dialog"
         role="dialog"
         aria-label="Search products"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>

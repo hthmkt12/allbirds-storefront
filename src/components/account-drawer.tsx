@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getOrders, CmsOrder } from "../utils/cms-client";
+import { useDrawerA11y } from "../utils/use-drawer-a11y";
 
 interface AccountDrawerProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface AccountDrawerProps {
 }
 
 export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
+  const panelRef = useDrawerA11y(isOpen, onClose);
   const [customerEmail, setCustomerEmail] = useState<string | null>(() => {
     return localStorage.getItem("customer_email");
   });
@@ -14,16 +16,6 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
   const [orders, setOrders] = useState<CmsOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
-
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
 
   // Load email on open or update
   useEffect(() => {
@@ -78,9 +70,11 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
     <>
       <div className={`cart-drawer-overlay ${isOpen ? "open" : ""}`} onClick={onClose} />
       <div
+        ref={panelRef}
         className={`account-drawer ${isOpen ? "open" : ""}`}
         role="dialog"
         aria-label="Account"
+        aria-modal="true"
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h2 style={{ margin: 0, fontFamily: "var(--serif)" }}>Account</h2>

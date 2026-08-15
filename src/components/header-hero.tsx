@@ -27,6 +27,7 @@ export function SiteHeader({
 
   return (
     <header className="site-header">
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <div className="announcement">Free Shipping on Orders over $150. Easy Returns.</div>
       <nav className="top-nav floating" aria-label="Primary navigation">
         <a
@@ -128,6 +129,7 @@ export function Hero({ audience, onAudienceChange }: HeroProps) {
               onClick={() => onAudienceChange(item)}
               role="tab"
               aria-selected={audience === item}
+              aria-controls="new-arrivals"
             >
               {item}
             </button>

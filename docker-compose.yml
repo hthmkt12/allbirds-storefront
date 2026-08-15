@@ -1,0 +1,30 @@
+services:
+  payload-cms:
+    build:
+      context: ./payload-cms
+      dockerfile: Dockerfile
+    container_name: allbirds-cms
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PAYLOAD_SECRET=replace-with-a-very-secure-random-secret-in-prod
+      - NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+      - PORT=3000
+    volumes:
+      - cms_data:/app/data
+
+  storefront:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: allbirds-storefront
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - payload-cms
+
+volumes:
+  cms_data:

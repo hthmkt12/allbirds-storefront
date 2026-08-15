@@ -47,7 +47,21 @@ Vì Payload CMS 3.x chạy trên Next.js 15 và sử dụng SQLite local file, c
 
 ---
 
-## 3. Local Production Preview
+## 3. Deploy bằng Docker & Docker Compose (Self-Hosted / VPS)
+
+Dự án đã có sẵn cấu hình container hóa độc lập cho cả Storefront và Backend CMS:
+
+```bash
+# Khởi chạy cả Storefront (Port 80) và Payload CMS (Port 3000)
+docker compose up -d --build
+```
+
+- **Storefront**: Nginx Alpine phục vụ static SPA routes (port 80).
+- **Payload CMS**: Node.js Alpine SSR (port 3000), có persistent volume `cms_data` cho SQLite.
+
+---
+
+## 4. Local Production Preview
 
 Để test bản build production nội bộ:
 ```bash

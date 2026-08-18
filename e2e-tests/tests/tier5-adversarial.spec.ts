@@ -45,7 +45,7 @@ test.describe('Tier 5: Adversarial and Hardening Scenarios', () => {
     await bagBtn.click();
 
     // Verify empty cart state is shown safely
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const emptyMsg = cartDrawer.locator('.cart-empty-message');
     await expect(emptyMsg).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('Tier 5: Adversarial and Hardening Scenarios', () => {
     const bagBtn = page.locator('button[aria-label="Bag"]');
     await bagBtn.click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // Verify items exist and quantities are normalized
@@ -136,7 +136,7 @@ test.describe('Tier 5: Adversarial and Hardening Scenarios', () => {
 
     // First add to cart — cart opens
     await addToBagBtn.click();
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible({ timeout: 5000 });
 
     // Close the cart via the close button

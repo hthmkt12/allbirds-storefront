@@ -316,22 +316,28 @@ After every bug fix, append a new entry using this format:
 ### Verification
 - Ran `npx playwright test -c e2e-tests/playwright.config.ts --project=chromium` and verified all 107 tests passed successfully.
 
-## 2026-08-15 - Unhandled preview server lifecycle and stale Playwright connection refused in E2E runs
+## 2026-08-18 - Orders collection public read PII leak and strict-mode E2E cart selector collision
 
 ### Symptoms
-- Playwright E2E test runs for payment gateway and customer account failed with `Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/`.
+- `GET /api/orders` exposed customer personal identifiable information (emails, shipping addresses) without authentication.
+- Playwright E2E tests in `tier5-adversarial.spec.ts` hit strict-mode locator violations because `.cart-drawer` resolved to both shopping cart and wishlist drawer.
 
 ### Root Cause
-- The Playwright configuration uses `reuseExistingServer: !process.env.CI`. When a build occurs, the local preview server is either not yet running, or a background worker was killed, leaving the port closed while Playwright assumed an existing server was alive.
+- `Orders.ts` had `access.read: () => true` allowing unauthenticated dumps of all customer orders.
+- Both shopping cart and wishlist drawers used `.cart-drawer` class without distinctive scoping in the test assertion.
 
 ### Common Triggers
-- Running isolated spec files directly using Playwright CLI without waiting for the webServer hook to complete initialization.
+- Querying Payload CMS API endpoints directly or running strict-mode assertions in Playwright tests.
 
 ### Solutions
-- Ensured `npm run build` is run prior to E2E execution, allowing Playwright's embedded `webServer` block (`npm run preview -- --port 5173`) to spin up cleanly and serve the fresh production bundle from `dist/`.
+- Locked `Orders.access.read` to authenticated CMS admins (`({ req: { user } }) => Boolean(user)`).
+- Added `orderToken` field auto-generated on order creation via `beforeChange` hook for secure guest lookup.
+- Updated Playwright test selector in `tier5-adversarial.spec.ts` to `.cart-drawer:not(.wishlist-drawer)`.
 
 ### Verification
-- Executed full test suites (`f1`, `f2`, `f6`, `f7`, `f8`, `f9`, `f10`) with all 50 tests passing on chromium.
+- Executed `npx vitest run` (23 tests passed).
+- Executed `npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier4-journeys.spec.ts e2e-tests/tests/tier5-adversarial.spec.ts` across Chromium, Mobile Chrome, and Mobile Safari (15 passed).
+
 
 
 

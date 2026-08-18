@@ -18,6 +18,18 @@ import { Orders } from './collections/Orders'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const resolvedSecret = process.env.PAYLOAD_SECRET || 'fallback-secret-for-development-only-replace-in-production'
+
+if (!process.env.PAYLOAD_SECRET && process.env.NODE_ENV === 'production') {
+  console.warn('[SECURITY WARNING] Running with default PAYLOAD_SECRET in production. Set PAYLOAD_SECRET in production environment!')
+}
+
+const resolvedDbUrl = process.env.DATABASE_URI || (
+  process.env.DATABASE_PATH
+    ? `file:${path.resolve(process.env.DATABASE_PATH)}`
+    : `file:${path.resolve(dirname, '../payload.db')}`
+)
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -37,10 +49,10 @@ export default buildConfig({
     Orders,
   ],
   editor: lexicalEditor({}),
-  secret: process.env.PAYLOAD_SECRET || 'fallback-secret-for-development-only-replace-in-production',
+  secret: resolvedSecret,
   db: sqliteAdapter({
     client: {
-      url: `file:${path.resolve(dirname, '../payload.db')}`,
+      url: resolvedDbUrl,
     },
   }),
   typescript: {

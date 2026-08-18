@@ -172,6 +172,7 @@ export interface CmsReview {
 
 export interface CmsOrder {
   id: string;
+  orderToken?: string;
   email: string;
   shippingName: string;
   shippingAddress: string;
@@ -408,6 +409,7 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
     const mockOrder: CmsOrder = {
       ...orderData,
       id: `local-order-${Date.now()}`,
+      orderToken: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `local-token-${Date.now()}`,
       status: "pending",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

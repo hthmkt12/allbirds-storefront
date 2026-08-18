@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload'
+import crypto from 'crypto'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -6,12 +7,33 @@ export const Orders: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
     create: () => true,
-    update: () => false,
-    delete: () => false,
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+  },
+  hooks: {
+    beforeChange: [
+      ({ data, operation }) => {
+        if (operation === 'create' && (!data || !data.orderToken)) {
+          return {
+            ...data,
+            orderToken: crypto.randomUUID(),
+          }
+        }
+        return data
+      },
+    ],
   },
   fields: [
+    {
+      name: 'orderToken',
+      type: 'text',
+      admin: {
+        readOnly: true,
+      },
+      index: true,
+    },
     {
       name: 'email',
       type: 'text',

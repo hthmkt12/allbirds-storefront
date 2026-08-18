@@ -10,6 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       - PAYLOAD_SECRET=replace-with-a-very-secure-random-secret-in-prod
+      - DATABASE_PATH=/app/data/payload.db
       - NEXT_PUBLIC_SERVER_URL=http://localhost:3000
       - PORT=3000
     volumes:

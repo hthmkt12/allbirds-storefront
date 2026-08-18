@@ -40,6 +40,7 @@ Vì Payload CMS 3.x chạy trên Next.js 15 và sử dụng SQLite local file, c
 - **Start Command**: `npm run start`
 - **Environment Variables bắt buộc**:
   - `PAYLOAD_SECRET`: Tạo 1 chuỗi random bảo mật cao (ví dụ: `openssl rand -hex 32`).
+  - `DATABASE_PATH`: Đường dẫn lưu file SQLite (ví dụ: `/app/data/payload.db` khi dùng Docker hoặc volume mount).
   - `NEXT_PUBLIC_SERVER_URL`: URL public của backend CMS (ví dụ: `https://cms.yourdomain.com`).
   - `PORT`: `3000` (hoặc port của platform cấp).
 - **Seeding Data ban đầu**:

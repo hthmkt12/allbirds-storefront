@@ -165,6 +165,18 @@ export default function App() {
     </>
   );
 
+  const cartDrawer = (
+    <CartDrawer
+      isOpen={isCartOpen}
+      onClose={() => setIsCartOpen(false)}
+      cart={cart}
+      onUpdateQuantity={updateQuantity}
+      onRemoveItem={removeFromCart}
+      onNavigate={navigate}
+      onAddToCart={addToCart}
+    />
+  );
+
   if (currentPath === "/checkout/confirmation") {
     return (
       <>
@@ -213,15 +225,7 @@ export default function App() {
           onToggleWishlist={toggleWishlist}
         />
         <NewsletterFooter />
-        <CartDrawer
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          cart={cart}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-          onNavigate={navigate}
-          onAddToCart={addToCart}
-        />
+        {cartDrawer}
         {renderOverlays()}
       </>
     );
@@ -239,15 +243,7 @@ export default function App() {
           onToggleWishlist={toggleWishlist}
         />
         <NewsletterFooter />
-        <CartDrawer
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          cart={cart}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-          onNavigate={navigate}
-          onAddToCart={addToCart}
-        />
+        {cartDrawer}
         {renderOverlays()}
       </>
     );
@@ -273,15 +269,7 @@ export default function App() {
         <PayloadContract />
       </main>
       <NewsletterFooter />
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQuantity={updateQuantity}
-        onRemoveItem={removeFromCart}
-        onNavigate={navigate}
-        onAddToCart={addToCart}
-      />
+      {cartDrawer}
       {renderOverlays()}
     </>
   );

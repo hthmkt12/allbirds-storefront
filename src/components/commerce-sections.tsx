@@ -1,13 +1,14 @@
 import { ArrowRight, Heart, Star } from "lucide-react";
 import { useState, useEffect } from "react";
-import { 
-  getCategories, 
-  getProducts, 
-  getPromoTiles, 
+import {
+  getCategories,
+  getProducts,
+  getPromoTiles,
   getImageUrl,
-  CmsCategory, 
-  CmsProduct, 
-  CmsPromoTile 
+  getProductColorways,
+  CmsCategory,
+  CmsProduct,
+  CmsPromoTile
 } from "../utils/cms-client";
 import { valueBlocks } from "../data/allbirds-data";
 import { ResponsiveImage } from "./responsive-image";
@@ -181,13 +182,7 @@ export function ProductCard({
   isWishlisted?: boolean;
   onToggleWishlist?: (item: { name: string; price: string; color: string; image: string }) => void;
 }) {
-  const colorways = product.colorways && product.colorways.length > 0
-    ? product.colorways
-    : [
-        { color: product.color || "Default Color", swatch: product.swatch || "#ccc", image: product.image || "/allbirds-crop-top-left.png" },
-        { color: "Stormy Lilac", swatch: "#c8d3d8", image: "/allbirds-lifestyle-hero.png" },
-        { color: "Burlwood", swatch: "#d4d9cf", image: "/allbirds-mvp-lifestyle.png" }
-      ];
+  const colorways = getProductColorways(product);
 
   const [colorwayIndex, setColorwayIndex] = useState(0);
   const activeColorway = colorways[colorwayIndex];

@@ -34,11 +34,11 @@ Key decision: keep the current React/Vite + Payload CMS architecture. Add only t
 | Phase | Name | Status |
 |-------|------|--------|
 | 1 | [Reference Research](./phase-01-reference-research.md) | Completed |
-| 2 | [Storefront Navigation And PLP](./phase-02-storefront-navigation-and-plp.md) | In Progress |
-| 3 | [Product Detail Cart And Checkout](./phase-03-product-detail-cart-and-checkout.md) | Pending |
-| 4 | [CMS Backend Commerce Data](./phase-04-cms-backend-commerce-data.md) | Pending |
-| 5 | [Search Account Help And Geo UX](./phase-05-search-account-help-and-geo-ux.md) | Pending |
-| 6 | [Testing Documentation And Hardening](./phase-06-testing-documentation-and-hardening.md) | Pending |
+| 2 | [Storefront Navigation And PLP](./phase-02-storefront-navigation-and-plp.md) | Completed |
+| 3 | [Product Detail Cart And Checkout](./phase-03-product-detail-cart-and-checkout.md) | Completed |
+| 4 | [CMS Backend Commerce Data](./phase-04-cms-backend-commerce-data.md) | Completed |
+| 5 | [Search Account Help And Geo UX](./phase-05-search-account-help-and-geo-ux.md) | Completed |
+| 6 | [Testing Documentation And Hardening](./phase-06-testing-documentation-and-hardening.md) | Completed |
 
 ## Dependencies
 

@@ -14,12 +14,13 @@ export function normalizeTags(tags: any): string[] {
 }
 
 export function normalizeSizes(sizes: any): number[] {
-  if (!Array.isArray(sizes)) return [];
-  const normalized = sizes.map((s: any) => {
-    if (typeof s === "number") return s;
-    if (s && typeof s === "object" && "size" in s) return Number(s.size);
-    return Number(s);
-  }).filter((s: number) => !isNaN(s));
+  const normalized = Array.isArray(sizes)
+    ? sizes.map((s: any) => {
+        if (typeof s === "number") return s;
+        if (s && typeof s === "object" && "size" in s) return Number(s.size);
+        return Number(s);
+      }).filter((s: number) => !isNaN(s))
+    : [];
   return normalized.length > 0 ? normalized : DEFAULT_SIZES;
 }
 

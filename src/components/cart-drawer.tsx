@@ -67,7 +67,7 @@ export function CartDrawer({
       />
       <div
         ref={panelRef}
-        className={`cart-drawer ${isOpen ? "open" : ""}`}
+        className={`drawer-panel cart-drawer ${isOpen ? "open" : ""}`}
         role="dialog"
         aria-label="Shopping Cart"
         aria-modal="true"

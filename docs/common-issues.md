@@ -379,6 +379,7 @@ After every bug fix, append a new entry using this format:
 
 ### Solutions
 - Updated all plain `page.locator('.cart-drawer')` occurrences across the seven affected spec files to `page.locator('.cart-drawer:not(.wishlist-drawer)')`, matching the established tier5 pattern.
+- Follow-up (same day): removed the collision at its source — extracted shared drawer styles to `.drawer-panel` / `.drawer-panel.open` in `styles.css`; `CartDrawer` renders `drawer-panel cart-drawer`, `WishlistDrawer` renders `drawer-panel wishlist-drawer`. `.cart-drawer` now matches exactly one element.
 - While investigating, deduplicated the CartDrawer JSX in `App.tsx` (single `cartDrawer` element reused by the three route branches) and split `src/utils/cms-client.ts` into a `cms-client/` module; both verified not to change behavior.
 
 ### Verification

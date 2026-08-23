@@ -25,7 +25,7 @@ export function WishlistDrawer({
       <div className={`cart-drawer-overlay ${isOpen ? "open" : ""}`} onClick={onClose} />
       <div
         ref={panelRef}
-        className={`cart-drawer wishlist-drawer ${isOpen ? "open" : ""}`}
+        className={`drawer-panel wishlist-drawer ${isOpen ? "open" : ""}`}
         role="dialog"
         aria-label="Wishlist"
         aria-modal="true"

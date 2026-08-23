@@ -116,7 +116,7 @@ a { text-decoration:none; }
   opacity: 1;
   pointer-events: auto;
 }
-.cart-drawer {
+.drawer-panel {
   position: fixed;
   top: 0;
   right: 0;
@@ -136,7 +136,7 @@ a { text-decoration:none; }
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
   visibility: hidden;
 }
-.cart-drawer.open {
+.drawer-panel.open {
   transform: translateX(0);
   visibility: visible;
 }

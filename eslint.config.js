@@ -3,7 +3,9 @@ import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
 export default tseslint.config(
-  { ignores: ["dist", "coverage"] },
+  // payload-cms runs its own Next.js build; keep the root config storefront-only
+  // so nested builds don't adopt these rules while walking up the tree.
+  { ignores: ["dist", "coverage", "payload-cms"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

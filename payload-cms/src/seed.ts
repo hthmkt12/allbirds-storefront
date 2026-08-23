@@ -8,6 +8,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 async function seed() {
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[WARNING] Seeding in production DELETES all existing documents (including users) before re-creating them.')
+  }
   console.log('Starting Allbirds Payload CMS seeding process...')
   const payload = await getPayload({ config: configPromise })
 

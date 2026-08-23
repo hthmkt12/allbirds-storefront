@@ -59,6 +59,10 @@ export default buildConfig({
   ],
   editor: lexicalEditor({}),
   secret: resolvedSecret,
+  // Storefront uses REST only; the admin panel uses the local API.
+  graphQL: {
+    disable: true,
+  },
   cors: allowedOrigins,
   csrf: allowedOrigins,
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || undefined,

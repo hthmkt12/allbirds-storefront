@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const OUTPUT_DIR = path.resolve(process.cwd(), 'plans/reports/phase6-screenshots');
+const OUTPUT_DIR = path.resolve(process.cwd(), 'e2e-tests/artifacts/phase6-screenshots');
 
 // Ensure output directory exists
 test.beforeAll(() => {

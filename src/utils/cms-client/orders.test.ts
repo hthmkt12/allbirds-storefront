@@ -71,18 +71,45 @@ describe("getOrders", () => {
     expect(orders).toHaveLength(1);
     expect(orders[0].id).toBe("mock-order-1");
     expect(orders[0].email).toBe("test@example.com");
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
-  it("merges and dedupes local orders with CMS results", async () => {
+  it("refreshes locally-known orders through the token lookup endpoint", async () => {
+    const localOrder = {
+      ...orderInput,
+      id: "local-1",
+      orderToken: "tok-12345678",
+      status: "pending",
+      createdAt: "2026-01-03",
+      updatedAt: "",
+    };
     const cmsOrder = { ...orderInput, id: "cms-1", status: "pending", createdAt: "2026-01-02", updatedAt: "" };
-    const localOrder = { ...orderInput, id: "local-1", status: "pending", createdAt: "2026-01-03", updatedAt: "" };
     localStorage.setItem("local_orders", JSON.stringify([localOrder]));
-    (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(async (url: any) => ({
       ok: true,
-      json: async () => ({ docs: [cmsOrder] }),
-    });
+      json: async () => {
+        expect(String(url)).toContain("/api/orders/lookup");
+        return { docs: [cmsOrder] };
+      },
+    }));
 
     const orders = await getOrders("Test@Example.com ");
     expect(orders.map((o) => o.id)).toEqual(["local-1", "cms-1"]);
+  });
+
+  it("keeps the local copy when the lookup endpoint is unreachable", async () => {
+    const localOrder = {
+      ...orderInput,
+      id: "local-1",
+      orderToken: "tok-12345678",
+      status: "pending",
+      createdAt: "2026-01-03",
+      updatedAt: "",
+    };
+    localStorage.setItem("local_orders", JSON.stringify([localOrder]));
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("offline"));
+
+    const orders = await getOrders("test@example.com");
+    expect(orders.map((o) => o.id)).toEqual(["local-1"]);
   });
 });

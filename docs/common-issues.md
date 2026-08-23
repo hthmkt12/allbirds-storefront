@@ -405,6 +405,30 @@ After every bug fix, append a new entry using this format:
 - `npx vitest run`: 49 tests passed (new mappers/image/orders/app-cart-flow suites).
 - `npm run lint` (0 errors), `npm run build`, and cart-related Playwright specs (f2/f3/smoke, 21 passed).
 
+## 2026-08-23 - Security audit findings: client-trusted order totals, guest order history gap, missing GraphQL lockdown
+
+### Symptoms
+- Full STRIDE/OWASP audit (`ck:security`) found orders accepted client-computed `subtotal/tax/shipping/total` on a public write endpoint, guests could no longer retrieve their CMS orders after the Aug-18 read lockdown, and `/api/graphql` was publicly exposed.
+
+### Root Cause
+- `Orders.ts` stored money fields verbatim from the request body with only an `orderToken` hook.
+- Guests have no session, so the admin-only list query returns 403; the `orderToken` existed but no lookup endpoint used it.
+- Payload enables GraphQL with introspection by default.
+
+### Common Triggers
+- Placing orders through any non-storefront client; viewing Account drawer order history as a guest; probing API surface.
+
+### Solutions
+- `Orders.ts`: added server-side `beforeChange` recompute of all money fields from sanitized `items[]` (mirrors TAX_RATE 8%, free shipping ≥ $150, flat $7.5) plus quantity clamping (1–99); added public `GET /api/orders/lookup?email=&token=` requiring BOTH email and token (min length 8).
+- `cms-client/orders.ts`: `getOrders` now refreshes locally-known orders via the token lookup endpoint instead of the 403-prone list query.
+- `payload.config.ts`: disabled GraphQL (`graphQL: { disable: true }`); `seed.ts` warns when run against production.
+- Fixed collateral issue: root `eslint.config.js` was being adopted by the CMS Next build walking up the tree and failing on pre-existing `any`s — added `payload-cms` to global ignores.
+
+### Verification
+- Storefront: lint clean, vitest 50/50, `npm run build`; f7+f8 Playwright specs 7/7.
+- CMS: full `next build` passes with build-time placeholder secret.
+- Note for deployment: root ESLint config now explicitly scoped to storefront only.
+
 
 
 

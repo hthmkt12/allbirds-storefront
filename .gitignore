@@ -40,3 +40,6 @@ test-debug.js
 .agentkit/
 
 .vercel
+
+# Tool-generated release manifest (churn; see plans/20260815-hardening-phase)
+release-manifest.json

@@ -21,7 +21,7 @@ test.describe('F2 Challenger: Cart Drawer Edge Cases', () => {
     await page.goto('/');
     await page.locator('button[aria-label="Bag"]').click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // Verify subtotal display - it will show $120.50 after formatting
@@ -49,7 +49,7 @@ test.describe('F2 Challenger: Cart Drawer Edge Cases', () => {
     await page.goto('/');
     await page.locator('button[aria-label="Bag"]').click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // Verify subtotal is positive $100 because regex [^0-9.] strips the negative sign
@@ -77,7 +77,7 @@ test.describe('F2 Challenger: Cart Drawer Edge Cases', () => {
     await page.goto('/');
     await page.locator('button[aria-label="Bag"]').click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     const subtotal = cartDrawer.locator('.cart-subtotal');
@@ -104,7 +104,7 @@ test.describe('F2 Challenger: Cart Drawer Edge Cases', () => {
     await page.goto('/');
     await page.locator('button[aria-label="Bag"]').click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // The subtotal will normalize to $0
@@ -132,7 +132,7 @@ test.describe('F2 Challenger: Cart Drawer Edge Cases', () => {
     await page.goto('/');
     await page.locator('button[aria-label="Bag"]').click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // Verify the cart item exists and fallback image renders

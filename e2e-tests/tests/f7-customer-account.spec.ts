@@ -58,7 +58,7 @@ test.describe('F7: Customer Account & Order History', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
 
     // 7. Go to Checkout

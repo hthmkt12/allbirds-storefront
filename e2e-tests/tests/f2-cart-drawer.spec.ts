@@ -14,7 +14,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     await expect(bagBtn).toBeVisible();
     await bagBtn.click();
 
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
   });
 
@@ -38,7 +38,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     await expect(addToBagBtn).toBeVisible();
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const drawerItem = cartDrawer.locator('.cart-item');
     await expect(drawerItem).toHaveCount(1);
@@ -54,7 +54,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const subtotal = cartDrawer.locator('.cart-subtotal');
     await expect(subtotal).toBeVisible();
@@ -68,7 +68,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const closeBtn = page.locator('.cart-drawer-close');
     await expect(closeBtn).toBeVisible();
     await closeBtn.click();
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).not.toBeVisible();
   });
 
@@ -84,7 +84,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     
     const plusBtn = cartDrawer.locator('.quantity-selector button.plus');
@@ -110,7 +110,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     
     const removeBtn = cartDrawer.locator('button.remove-item');
@@ -132,7 +132,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     await page.reload();
     
     await page.locator('button[aria-label="Bag"]').click();
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const drawerItem = cartDrawer.locator('.cart-item');
     await expect(drawerItem).toHaveCount(1);
@@ -146,7 +146,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const progressBar = cartDrawer.locator('.shipping-progress-bar');
     await expect(progressBar).toBeVisible();
@@ -161,7 +161,7 @@ test.describe('F2: Cart Drawer Operations', () => {
     const addToBagBtn = productCard.locator('button:has-text("Add to Bag")');
     await addToBagBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const checkoutBtn = cartDrawer.locator('.checkout-button');
     await expect(checkoutBtn).toBeVisible();

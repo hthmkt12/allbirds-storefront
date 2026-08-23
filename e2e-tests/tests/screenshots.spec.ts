@@ -28,7 +28,7 @@ const PAGE_STATES = [
     const bagBtn = page.locator('button[aria-label="Bag"]');
     await expect(bagBtn).toBeVisible();
     await bagBtn.click();
-    await expect(page.locator('.cart-drawer')).toBeVisible();
+    await expect(page.locator('.cart-drawer:not(.wishlist-drawer)')).toBeVisible();
   }},
   { name: 'checkout', path: '/checkout', isDialog: false, preAction: async (page) => {
     // Seed localStorage cart to bypass empty-cart guard

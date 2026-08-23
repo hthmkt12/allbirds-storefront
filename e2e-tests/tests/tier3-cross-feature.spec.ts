@@ -22,7 +22,7 @@ test.describe('Tier 3: Cross-Feature Pairwise Interactions', () => {
     await expect(addBtn).toBeVisible();
     await addBtn.click();
     
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const cartItem = cartDrawer.locator('.cart-item');
     await expect(cartItem).toHaveCount(1);
@@ -59,7 +59,7 @@ test.describe('Tier 3: Cross-Feature Pairwise Interactions', () => {
     await expect(page).toHaveURL(/.*#sale/);
 
     // 4. Verify cart drawer visibility status is retained/logical
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     await expect(cartDrawer.locator('.cart-drawer-close')).toBeVisible();
   });
@@ -85,7 +85,7 @@ test.describe('Tier 3: Cross-Feature Pairwise Interactions', () => {
     await bagBtn.click();
 
     // 2. Check accessibility attributes on the drawer strictly without fallbacks
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     
     const ariaLabel = await cartDrawer.getAttribute('aria-label');

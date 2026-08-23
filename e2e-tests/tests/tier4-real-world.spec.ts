@@ -39,7 +39,7 @@ test.describe('Tier 4: Real-World User Scenarios', () => {
     await addToBagBtn.click();
     
     // 2. Verify drawer is opened with item strictly
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     const drawerItem = cartDrawer.locator('.cart-item');
     await expect(drawerItem).toHaveCount(1);

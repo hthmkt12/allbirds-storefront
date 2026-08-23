@@ -163,7 +163,7 @@ test.describe('F1: Product Options Selection and Details', () => {
     await addToBagBtn.click({ force: true });
 
     // 6. Verify cart drawer opens and updates correctly
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     
     const cartItem = cartDrawer.locator('.cart-item');

@@ -364,6 +364,28 @@ After every bug fix, append a new entry using this format:
 - `npm run build` for storefront (passed, 6.5s).
 - `npm run build` inside `payload-cms/` without secret: fails fast with `[SECURITY] PAYLOAD_SECRET is required in production`; with `PAYLOAD_SECRET=ci-build-placeholder`: full Next.js build passes.
 
+## 2026-08-23 - Cart drawer strict-mode violations in f1/f2/f7/f8/tier3/tier4 selectors after wishlist feature
+
+### Symptoms
+- E2E tests in `f2-cart-drawer.spec.ts` failed with `strict mode violation: locator('.cart-drawer') resolved to 2 elements`.
+- Same latent failure existed in `f1-product-options`, `f7-customer-account`, `f8-payment-gateway`, `screenshots`, `tier3-cross-feature`, and `tier4-real-world`.
+
+### Root Cause
+- The wishlist drawer (`wishlist-drawer.tsx`) reuses the shared `.cart-drawer` panel class (`className="cart-drawer wishlist-drawer"`) because all drawer CSS lives under `.cart-drawer`. It is always mounted via `renderOverlays()`, so any test locating plain `.cart-drawer` matches two elements.
+- The August-18 fix updated only the tier5 selector; the remaining specs kept the ambiguous locator.
+
+### Common Triggers
+- Running cart-related E2E specs after the wishlist drawer was introduced; adding new tests that locate `.cart-drawer` directly.
+
+### Solutions
+- Updated all plain `page.locator('.cart-drawer')` occurrences across the seven affected spec files to `page.locator('.cart-drawer:not(.wishlist-drawer)')`, matching the established tier5 pattern.
+- While investigating, deduplicated the CartDrawer JSX in `App.tsx` (single `cartDrawer` element reused by the three route branches) and split `src/utils/cms-client.ts` into a `cms-client/` module; both verified not to change behavior.
+
+### Verification
+- `npx playwright test -c e2e-tests/playwright.config.ts f2-cart-drawer f2-cart-drawer-challenger tier3-cross-feature smoke --project=chromium --workers=1`: 22 passed.
+- Confirmed via `git stash` that the failures reproduced on HEAD before the refactor (pre-existing, not caused by it).
+- `npm run build` and `npm test` passed after the refactor (23 unit tests).
+
 
 
 

@@ -11,7 +11,7 @@ test.describe('F8: Payment Gateway Integration', () => {
     await expect(productCard).toBeVisible();
     await productCard.locator('button.size-button').first().click();
     await productCard.locator('button:has-text("Add to Bag")').click();
-    const cartDrawer = page.locator('.cart-drawer');
+    const cartDrawer = page.locator('.cart-drawer:not(.wishlist-drawer)');
     await expect(cartDrawer).toBeVisible();
     await cartDrawer.locator('button:has-text("Checkout")').click();
     await expect(page).toHaveURL(/\/checkout/);

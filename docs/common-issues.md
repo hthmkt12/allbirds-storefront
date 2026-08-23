@@ -428,6 +428,7 @@ After every bug fix, append a new entry using this format:
 - Storefront: lint clean, vitest 50/50, `npm run build`; f7+f8 Playwright specs 7/7.
 - CMS: full `next build` passes with build-time placeholder secret.
 - Note for deployment: root ESLint config now explicitly scoped to storefront only.
+- Follow-up (same day): added security headers via `vercel.json` + `nginx.conf` (nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS on Vercel; CSP intentionally deferred because the CMS origin is not fixed at build time) and an in-memory app-level rate limit (5 creates/min/IP) in `Orders.beforeChange` for the public create endpoint — edge/proxy limiting remains the recommended first line.
 
 
 

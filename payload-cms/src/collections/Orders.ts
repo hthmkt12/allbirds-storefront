@@ -14,6 +14,32 @@ const parsePrice = (price: unknown): number => {
 
 const round2 = (n: number): number => Math.round(n * 100) / 100
 
+// App-level DoS guard for the public create endpoint. Edge/proxy rate limiting
+// (Cloudflare, nginx limit_req) remains the recommended first line of defense.
+const RATE_WINDOW_MS = 60_000
+const RATE_MAX_PER_WINDOW = 5
+const orderAttempts = new Map<string, number[]>()
+
+const clientKeyOf = (req: { headers: Headers }): string => {
+  const forwarded = req.headers.get('x-forwarded-for')
+  return (forwarded || 'unknown').split(',')[0].trim()
+}
+
+const enforceOrderRateLimit = (req: { headers: Headers }): void => {
+  const now = Date.now()
+  const key = clientKeyOf(req)
+  const hits = (orderAttempts.get(key) || []).filter((ts) => now - ts < RATE_WINDOW_MS)
+  if (hits.length >= RATE_MAX_PER_WINDOW) {
+    throw new Error('Too many orders created from this address. Please try again in a minute.')
+  }
+  hits.push(now)
+  orderAttempts.set(key, hits)
+  // Prune stale keys so the in-memory map cannot grow unbounded.
+  for (const [k, timestamps] of orderAttempts) {
+    if (timestamps.every((ts) => now - ts >= RATE_WINDOW_MS)) orderAttempts.delete(k)
+  }
+}
+
 const sanitizeQuantity = (q: unknown): number => {
   const n = Math.floor(Number(q))
   return Number.isFinite(n) && n > 0 ? Math.min(n, 99) : 1
@@ -48,8 +74,9 @@ export const Orders: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
-      ({ data, operation }) => {
+      ({ data, operation, req }) => {
         if (!data) return data
+        if (operation === 'create') enforceOrderRateLimit(req)
         const generatedToken =
           operation === 'create' && !data.orderToken ? crypto.randomUUID() : null
         return {

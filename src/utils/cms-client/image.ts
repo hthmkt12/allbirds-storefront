@@ -1,5 +1,5 @@
 import { CMS_BASE_URL } from "../commerce-config";
-import { CmsMedia, CmsProduct } from "./types";
+import { CmsProduct } from "./types";
 
 export function resolveCmsUrl(url: string | undefined | null): string {
   if (!url) return "";

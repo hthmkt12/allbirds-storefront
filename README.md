@@ -114,15 +114,20 @@ npx playwright test -c e2e-tests/playwright.config.ts --ui
 
 ### Test coverage
 
-| Tier | Tests | Description |
+| Suite | Tests | Description |
 |---|---:|---|
-| T1 Feature (F1–F6) | 60 | Happy-path per feature |
-| T2 Boundary (F1–F6) | 60 | Edge cases, disabled states |
+| F1 Product options | 14 | Size/color selection, disabled states |
+| F2 Cart drawer (+ challenger) | 15 | Add/update/remove, persistence |
+| F3 CMS integration | 10 | Live Payload data + offline fallback |
+| F4 Brand pages | 13 | Collections, brand story |
+| F5 Asset performance | 10 | WebP/AVIF srcset, lazy loading |
+| F6 Accessibility | 10 | Keyboard, ARIA, focus management |
+| F7–F11 Account / payment / help / PLP / wishlist | 14 | Later feature additions |
 | T3 Cross-feature | 6 | Pairwise integration |
 | T4 Real-world journeys | 5 | Full shopping flows |
 | T5 Adversarial | 5 | XSS, corrupted storage, CMS offline |
-| Smoke | 1 | Homepage load |
-| **Total** | **137** × 3 browsers = **231** | 225 pass · 6 intentional mobile skips |
+| Smoke + screenshots | 3 | Homepage load, visual capture |
+| **Total** | **102 specs × 3 browser projects = 306 executions** | CI runs Chromium-only (102) |
 
 ---
 

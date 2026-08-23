@@ -1,6 +1,6 @@
 # Plan: Production Hardening, Security & Infrastructure Alignment
 
-- **Status**: Ready
+- **Status**: Completed (2026-08-23: Orders access + orderToken shipped in 086b59e; storage/secret hardening completed with PAYLOAD_SECRET fail-fast and env-based compose secret)
 - **Date**: 2026-08-18
 - **Goal**: Hardening Payload CMS Orders collection against PII leaks, adding order lookup token mechanism, fixing Docker volume SQLite & uploads paths, enforcing production secret verification.
 - **Reference**: `plans/reports/advise-20260818-production-hardening-and-security.md`
@@ -16,9 +16,9 @@
 ---
 
 ## Acceptance Criteria
-- [ ] `GET /api/orders` without authenticated CMS admin returns unauthorized / empty array.
-- [ ] Orders created by Storefront contain auto-generated `orderToken`.
-- [ ] Storefront checkout flow completes successfully and saves `orderToken` locally for confirmation display.
-- [ ] `DATABASE_PATH` and media uploads directory properly configurable via environment variables in `payload.config.ts` and `docker-compose.yml`.
-- [ ] `npm run build` passes with zero TypeScript errors.
-- [ ] Vitest unit tests and Playwright E2E tests pass 100%.
+- [x] `GET /api/orders` without authenticated CMS admin returns unauthorized / empty array.
+- [x] Orders created by Storefront contain auto-generated `orderToken`.
+- [x] Storefront checkout flow completes successfully and saves `orderToken` locally for confirmation display.
+- [x] `DATABASE_PATH` and media uploads directory properly configurable via environment variables in `payload.config.ts` and `docker-compose.yml`.
+- [x] `npm run build` passes with zero TypeScript errors.
+- [x] Vitest unit tests and Playwright E2E tests pass 100%.

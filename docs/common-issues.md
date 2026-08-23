@@ -336,7 +336,7 @@ After every bug fix, append a new entry using this format:
 
 ### Verification
 - Executed `npx vitest run` (23 tests passed).
-- Executed `npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier4-journeys.spec.ts e2e-tests/tests/tier5-adversarial.spec.ts` across Chromium, Mobile Chrome, and Mobile Safari (15 passed).
+- Executed `npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier4-real-world.spec.ts e2e-tests/tests/tier5-adversarial.spec.ts` across Chromium, Mobile Chrome, and Mobile Safari (15 passed).
 
 ## 2026-08-23 - User email exposure, weak PAYLOAD_SECRET handling, and hardcoded secrets in deployment files
 

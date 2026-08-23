@@ -4,7 +4,7 @@ description: >-
   Turn the current CMS-fed Allbirds storefront prototype into a complete local
   commerce app with PLP, PDP, cart, checkout, search, and backend catalog/order
   support.
-status: in-progress
+status: completed
 priority: P2
 branch: master
 tags: []

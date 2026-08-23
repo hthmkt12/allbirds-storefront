@@ -17,7 +17,6 @@ export function WishlistDrawer({
   wishlist,
   onRemoveItem,
   onAddToCart,
-  onNavigate,
 }: WishlistDrawerProps) {
   const panelRef = useDrawerA11y(isOpen, onClose);
 

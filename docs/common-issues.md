@@ -386,6 +386,24 @@ After every bug fix, append a new entry using this format:
 - Confirmed via `git stash` that the failures reproduced on HEAD before the refactor (pre-existing, not caused by it).
 - `npm run build` and `npm test` passed after the refactor (23 unit tests).
 
+## 2026-08-23 - CMS products without sizes normalized to empty array after cms-client modularization
+
+### Symptoms
+- New unit test for `normalizeSizes` failed: products fetched from the CMS without a `sizes` field got `sizes: []` instead of `DEFAULT_SIZES`, diverging from pre-refactor behavior.
+
+### Root Cause
+- While splitting `cms-client.ts` into modules, `normalizeSizes` early-returned `[]` for non-array input; originally, missing sizes fell through to `DEFAULT_SIZES`.
+
+### Common Triggers
+- Fetching product docs from a live CMS where the `sizes` array is absent or empty.
+
+### Solutions
+- Restored the original semantics in `cms-client/mappers.ts`: normalize when an array exists, then return `DEFAULT_SIZES` whenever no valid sizes remain.
+
+### Verification
+- `npx vitest run`: 49 tests passed (new mappers/image/orders/app-cart-flow suites).
+- `npm run lint` (0 errors), `npm run build`, and cart-related Playwright specs (f2/f3/smoke, 21 passed).
+
 
 
 

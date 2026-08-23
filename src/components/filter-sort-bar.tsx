@@ -49,7 +49,7 @@ export function applyFiltersAndSort(
   filters: FilterState,
   sort: SortKey
 ): CmsProduct[] {
-  let result = products.filter((p) => {
+  const result = products.filter((p) => {
     const pSizes = p.sizes && p.sizes.length ? p.sizes : DEFAULT_SIZES;
     if (filters.sizes.length > 0 && !filters.sizes.some((s) => pSizes.includes(s))) return false;
 

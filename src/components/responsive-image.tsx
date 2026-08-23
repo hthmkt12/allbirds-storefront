@@ -1,5 +1,5 @@
 import React from 'react';
-import { getImageUrl, getImageSrcSet } from '../utils/cms-client';
+import { getImageSrcSet } from '../utils/cms-client';
 
 interface ResponsiveImageProps {
   image: any;

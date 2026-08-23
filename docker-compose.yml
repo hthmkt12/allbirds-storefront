@@ -9,7 +9,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PAYLOAD_SECRET=replace-with-a-very-secure-random-secret-in-prod
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in the .env file next to docker-compose.yml}
       - DATABASE_PATH=/app/data/payload.db
       - NEXT_PUBLIC_SERVER_URL=http://localhost:3000
       - PORT=3000

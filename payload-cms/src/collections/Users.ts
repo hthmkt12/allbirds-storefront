@@ -4,7 +4,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   admin: {
     useAsTitle: 'email',

@@ -338,6 +338,32 @@ After every bug fix, append a new entry using this format:
 - Executed `npx vitest run` (23 tests passed).
 - Executed `npx playwright test -c e2e-tests/playwright.config.ts e2e-tests/tests/tier4-journeys.spec.ts e2e-tests/tests/tier5-adversarial.spec.ts` across Chromium, Mobile Chrome, and Mobile Safari (15 passed).
 
+## 2026-08-23 - User email exposure, weak PAYLOAD_SECRET handling, and hardcoded secrets in deployment files
+
+### Symptoms
+- `GET /api/users` returned the full user list including admin email addresses without authentication.
+- CMS started in production with the default dev secret (`fallback-secret-for-development-only-replace-in-production`) and only logged a console warning.
+- `docker-compose.yml` embedded a placeholder `PAYLOAD_SECRET` string instead of reading from the environment.
+
+### Root Cause
+- `Users.ts` had `access.read: () => true`, exposing account emails via the public REST API.
+- `payload.config.ts` fell back to a hardcoded secret and never failed fast; no CORS/CSRF/serverURL configuration existed.
+- Compose file hard-coded the secret value instead of interpolating `${PAYLOAD_SECRET}` from `.env`.
+
+### Common Triggers
+- Querying `/api/users` directly; deploying with a forgotten `PAYLOAD_SECRET`; running `docker compose up` without a `.env` file.
+
+### Solutions
+- Restricted `Users.access.read` to authenticated users (`({ req: { user } }) => Boolean(user)`).
+- Made `payload.config.ts` throw when `PAYLOAD_SECRET` is missing in production; added optional `CMS_ALLOWED_ORIGINS` (comma-separated) driving `cors`/`csrf` and `serverURL` from `NEXT_PUBLIC_SERVER_URL`.
+- Added build-only `PAYLOAD_SECRET=ci-build-placeholder` to the CI `cms-ci` job and the CMS Dockerfile builder stage so production builds compile while runtime still requires the real secret.
+- Changed `docker-compose.yml` to `${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in the .env file next to docker-compose.yml}` (fails fast when unset).
+- Made seed admin credentials overridable via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`.
+
+### Verification
+- `npm run build` for storefront (passed, 6.5s).
+- `npm run build` inside `payload-cms/` without secret: fails fast with `[SECURITY] PAYLOAD_SECRET is required in production`; with `PAYLOAD_SECRET=ci-build-placeholder`: full Next.js build passes.
+
 
 
 

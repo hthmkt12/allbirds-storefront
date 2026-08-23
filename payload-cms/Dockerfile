@@ -7,6 +7,8 @@ RUN npm ci
 
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Build-time placeholder only; the real PAYLOAD_SECRET must be provided at runtime.
+ENV PAYLOAD_SECRET=ci-build-placeholder
 RUN npm run build
 
 FROM node:20-alpine AS runner

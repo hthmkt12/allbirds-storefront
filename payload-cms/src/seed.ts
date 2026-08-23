@@ -31,8 +31,8 @@ async function seed() {
   await payload.create({
     collection: 'users',
     data: {
-      email: 'admin@allbirds.com',
-      password: 'adminpassword123',
+      email: process.env.SEED_ADMIN_EMAIL || 'admin@allbirds.com',
+      password: process.env.SEED_ADMIN_PASSWORD || 'adminpassword123',
     },
   })
 

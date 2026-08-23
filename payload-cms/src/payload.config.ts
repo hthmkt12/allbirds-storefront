@@ -21,8 +21,17 @@ const dirname = path.dirname(filename)
 const resolvedSecret = process.env.PAYLOAD_SECRET || 'fallback-secret-for-development-only-replace-in-production'
 
 if (!process.env.PAYLOAD_SECRET && process.env.NODE_ENV === 'production') {
-  console.warn('[SECURITY WARNING] Running with default PAYLOAD_SECRET in production. Set PAYLOAD_SECRET in production environment!')
+  throw new Error('[SECURITY] PAYLOAD_SECRET is required in production. Set the PAYLOAD_SECRET environment variable before starting the server.')
 }
+
+const parseOrigins = (value: string | undefined): string[] | undefined => {
+  if (!value) return undefined
+  const origins = value.split(',').map((origin) => origin.trim()).filter(Boolean)
+  return origins.length > 0 ? origins : undefined
+}
+
+// Cross-origin access for the storefront; unset keeps Payload defaults (no regression for local dev).
+const allowedOrigins = parseOrigins(process.env.CMS_ALLOWED_ORIGINS)
 
 const resolvedDbUrl = process.env.DATABASE_URI || (
   process.env.DATABASE_PATH
@@ -50,6 +59,9 @@ export default buildConfig({
   ],
   editor: lexicalEditor({}),
   secret: resolvedSecret,
+  cors: allowedOrigins,
+  csrf: allowedOrigins,
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || undefined,
   db: sqliteAdapter({
     client: {
       url: resolvedDbUrl,

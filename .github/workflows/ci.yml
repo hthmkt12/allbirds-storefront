@@ -50,6 +50,8 @@ jobs:
       - name: Build Payload CMS
         working-directory: ./payload-cms
         run: npm run build
+        env:
+          PAYLOAD_SECRET: ci-build-placeholder
 
   e2e-ci:
     name: Playwright E2E Tests

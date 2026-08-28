@@ -26,6 +26,16 @@ payload-cms/payload.db-wal
 # Payload CMS media uploads
 payload-cms/media/
 
+# EmDash backend
+emdash-backend/node_modules/
+emdash-backend/dist/
+emdash-backend/data.db
+emdash-backend/data.db-shm
+emdash-backend/data.db-wal
+emdash-backend/uploads/
+emdash-backend/.env
+emdash-backend/.emdash/
+
 # TypeScript build cache
 *.tsbuildinfo
 

@@ -2,5 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "allbirds-emdash-backend",
   "compatibility_date": "2026-08-28",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "allbirds-emdash-db",
+      "database_id": "cff34541-1547-4da2-8a2d-199f111ef5a8"
+    }
+  ]
 }

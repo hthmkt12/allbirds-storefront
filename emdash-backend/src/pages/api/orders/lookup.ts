@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { Database } from "bun:sqlite";
 
 export const prerender = false;
 

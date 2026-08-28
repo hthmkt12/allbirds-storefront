@@ -1,14 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "allbirds-emdash-backend",
-  "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-08-28",
-  "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "allbirds-emdash-db",
-      "database_id": "local-emdash-d1-preview"
-    }
-  ]
+  "compatibility_flags": ["nodejs_compat"]
 }

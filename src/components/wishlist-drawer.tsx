@@ -86,7 +86,7 @@ export function WishlistDrawer({
                       minHeight: "32px",
                     }}
                   >
-                    View Details
+                    Move to Bag
                   </button>
                   <button
                     type="button"

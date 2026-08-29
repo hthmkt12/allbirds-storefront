@@ -17,14 +17,25 @@
 |---|------|-------|--------------|--------|-----------------|
 | 1 | E2E Testing Track | Build test runner, cases T1-T4, publish TEST_READY.md | None | DONE | 443a3f9d-eaf4-4341-a4fd-1fa4b2f4dae7 |
 | 2 | CMS Setup (M1) | Setup Payload CMS under `/payload-cms`, SQLite db, define 6 collections, seed data | None | DONE | 577ad584-709b-4d21-9e78-19dadf5947dd |
-| 3 | API Integration (M2) | Replace mock data in frontend with fetches from local Payload CMS API endpoints | M1 | DONE | 2eedaf07-3504-4419-a01c-ac22446490a9 |
+| 3 | API Integration (M2) | Frontend CMS client + fetch/fallback wired to the API contract below | M1 | PARTIAL (frontend only) | 2eedaf07-3504-4419-a01c-ac22446490a9 |
 | 4 | PDP & Cart Drawer (M3) | Implement PDP selectors, Cart Drawer, item count edit/delete, price totals | M2 | DONE | 0d2f5db9-29ec-426d-9a6f-0aa5465d0d84 |
 | 5 | Brand Pages & Accessibility (M4) | Collection pages, Brand story, accessibility fixes, skip link, keyboard focus | M3 | DONE | ee7299f7-3a91-43c3-97b4-bd8a62033126 |
 | 6 | Performance Polish (M5) | WebP/AVIF image generation, srcset, responsive images, remove sprite crops | M3 | DONE | bf8902d5-159a-429a-92f9-d7e8efcc9c9b |
 | 7 | Final E2E & Hardening (M6) | Pass all E2E tests, write Tier 5 adversarial tests, verify audits | M4, M5, M1 | DONE | 5835f5a7-d55b-44ac-9ca6-5de3411efc59 |
 
+## Backend Status (mock-first)
+
+The storefront is currently a mock-first application. The frontend CMS client
+(`src/utils/cms-client/`) implements the full API contract below with a
+built-in fallback to local mock data (`src/data/allbirds-data.ts`), but the
+active EmDash backend does not yet serve the content endpoints. As of
+2026-08-29, `GET /api/*` content routes return 404 and only
+`GET /api/orders/lookup` exists (returning an empty result). See
+`docs/common-issues.md` for details. The contract below is the target for a
+future backend; treat it as the client-side contract, not a live API.
+
 ## Interface Contracts
-### Payload CMS Collections & Fields
+### CMS Collections & Fields
 1. `heroBlocks`: `headline`, `body`, `ctaLabel`, `media` (relation to Media), `themeSwatch`
 2. `categories`: `name`, `slug`, `cta`, `swatch`, `image` (relation to Media)
 3. `products`: `name`, `price`, `colorways` (array of: color name, swatch color, image relation to Media), `fit`, `rating`, `tags` (array), `category` (relation to Categories), `sizes` (array of numbers)
@@ -32,7 +43,7 @@
 5. `reviews`: `product` (relation to Products), `quote`, `customerName`, `detail`
 6. `promoTiles`: `title`, `swatch`, `image` (relation to Media)
 
-### Payload CMS API Endpoint Responses
+### CMS API Endpoint Responses (target contract — not yet served by the backend)
 - `GET /api/hero-blocks` -> JSON list of hero blocks.
 - `GET /api/categories` -> JSON list of categories.
 - `GET /api/products` -> JSON list of products with colorways, sizes, ratings.

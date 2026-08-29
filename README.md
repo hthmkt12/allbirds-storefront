@@ -162,4 +162,7 @@ See [`docs/common-issues.md`](docs/common-issues.md) for a log of past bugs, roo
 
 ## Project Status
 
-All 7 milestones complete. See [`PROJECT.md`](PROJECT.md) for the milestone table.
+Mock-first storefront: the frontend and E2E suite are complete, but the CMS
+backend does not yet serve the content APIs, so the app runs on local mock data
+via fallback. See [`PROJECT.md`](PROJECT.md) for the milestone table and backend
+status, and [`docs/common-issues.md`](docs/common-issues.md) for details.

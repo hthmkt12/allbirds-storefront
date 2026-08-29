@@ -59,19 +59,22 @@ export async function getOrders(email: string): Promise<CmsOrder[]> {
   const tokens = Array.from(
     new Set(localOrders.map((o) => o.orderToken).filter((t): t is string => Boolean(t))),
   );
-  const refreshed: CmsOrder[] = [];
-  for (const token of tokens) {
-    try {
-      const res = await fetchWithTimeout(
-        `${CMS_BASE_URL}/api/orders/lookup?email=${encodeURIComponent(cleanEmail)}&token=${encodeURIComponent(token)}`,
-      );
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const data = await res.json();
-      if (data && Array.isArray(data.docs)) refreshed.push(...data.docs);
-    } catch (err) {
-      console.warn(`Order lookup failed for token ${token}, keeping local copy`, err);
-    }
-  }
+  const refreshedResults = await Promise.all(
+    tokens.map(async (token) => {
+      try {
+        const res = await fetchWithTimeout(
+          `${CMS_BASE_URL}/api/orders/lookup?email=${encodeURIComponent(cleanEmail)}&token=${encodeURIComponent(token)}`,
+        );
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+        return Array.isArray(data?.docs) ? (data.docs as CmsOrder[]) : [];
+      } catch (err) {
+        console.warn(`Order lookup failed for token ${token}, keeping local copy`, err);
+        return [];
+      }
+    }),
+  );
+  const refreshed: CmsOrder[] = refreshedResults.flat();
 
   const combined = [...localOrders];
   for (const remote of refreshed) {

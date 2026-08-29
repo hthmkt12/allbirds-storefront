@@ -1,0 +1,18 @@
+version: 1
+concurrency: 2
+jobs:
+  - id: e2e-test-verification
+    runtime: internal
+    task: test
+    cwd: C:/Users/manhpc/orca/workspaces/Allbirds/catfish
+    prompt: "Run root vitest test suite and verify build integrity for both frontend and backend."
+    timeout: 5m
+    expected_output: "Test and build logs proving 100% pass."
+
+  - id: d1-migration-validation
+    runtime: internal
+    task: review
+    cwd: C:/Users/manhpc/orca/workspaces/Allbirds/catfish
+    prompt: "Audit SQL syntax and integrity of emdash-backend/migrations/0001_content_tables.sql, 0002_orders_tables.sql, and scripts/seed-d1.sql."
+    timeout: 5m
+    expected_output: "SQL validation report."

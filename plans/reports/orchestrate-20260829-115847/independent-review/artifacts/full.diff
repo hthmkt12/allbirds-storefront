@@ -1,0 +1,225 @@
+﻿diff --git a/src/App.tsx b/src/App.tsx
+index 4f22eda..99ea3e1 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -63,7 +63,7 @@ export default function App() {
+       if (saved) {
+         const parsed = JSON.parse(saved);
+         if (Array.isArray(parsed)) {
+-          return parsed.map((item: any) => ({
++          return parsed.map((item: Partial<CartItem>) => ({
+             id: item.id || `${item.name}-${item.size}-${item.color}`,
+             name: item.name || "Unknown Item",
+             price: item.price || "$0",
+diff --git a/src/components/filter-sort-bar.tsx b/src/components/filter-sort-bar.tsx
+index b8b8932..c050509 100644
+--- a/src/components/filter-sort-bar.tsx
++++ b/src/components/filter-sort-bar.tsx
+@@ -30,7 +30,7 @@ function deriveOptions(products: CmsProduct[]) {
+   for (const p of products) {
+     (p.sizes || DEFAULT_SIZES).forEach((s) => sizes.add(s));
+     const cws = p.colorways && p.colorways.length ? p.colorways : [{ color: p.color || "" }];
+-    cws.forEach((cw: any) => cw.color && colors.add(cw.color));
++    cws.forEach((cw: { color?: string }) => cw.color && colors.add(cw.color));
+     (p.tags || []).forEach((t) => tags.add(t));
+     const price = parseFloat((p.price || "0").replace(/[^0-9.]/g, ""));
+     if (price > maxPrice) maxPrice = price;
+@@ -55,7 +55,7 @@ export function applyFiltersAndSort(
+ 
+     if (filters.colors.length > 0) {
+       const cws = p.colorways && p.colorways.length ? p.colorways : [{ color: p.color || "" }];
+-      const productColors = cws.map((cw: any) => cw.color);
++      const productColors = cws.map((cw: { color?: string }) => cw.color);
+       if (!filters.colors.some((c) => productColors.includes(c))) return false;
+     }
+ 
+diff --git a/src/components/responsive-image.tsx b/src/components/responsive-image.tsx
+index 88c7a01..3a1e748 100644
+--- a/src/components/responsive-image.tsx
++++ b/src/components/responsive-image.tsx
+@@ -1,8 +1,8 @@
+ import React from 'react';
+-import { getImageSrcSet } from '../utils/cms-client';
++import { getImageSrcSet, CmsMedia } from '../utils/cms-client';
+ 
+ interface ResponsiveImageProps {
+-  image: any;
++  image: CmsMedia | string | null | undefined;
+   alt?: string;
+   className?: string;
+   sizes?: string;
+diff --git a/src/utils/cms-client/image.ts b/src/utils/cms-client/image.ts
+index 10d33c1..72069c2 100644
+--- a/src/utils/cms-client/image.ts
++++ b/src/utils/cms-client/image.ts
+@@ -1,6 +1,15 @@
+ import { CMS_BASE_URL } from "../commerce-config";
+ import { CmsProduct } from "./types";
+ 
++type ImageInput =
++  | string
++  | {
++      url?: string;
++      sizes?: Record<string, { url?: string } | undefined>;
++    }
++  | null
++  | undefined;
++
+ export function resolveCmsUrl(url: string | undefined | null): string {
+   if (!url) return "";
+   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("//")) {
+@@ -9,7 +18,7 @@ export function resolveCmsUrl(url: string | undefined | null): string {
+   return `${CMS_BASE_URL}${url}`;
+ }
+ 
+-export function getImageUrl(image: any): string {
++export function getImageUrl(image: ImageInput): string {
+   if (!image) return "";
+   if (typeof image === "string") return resolveCmsUrl(image);
+   if (image && typeof image === "object" && typeof image.url === "string") {
+@@ -18,7 +27,7 @@ export function getImageUrl(image: any): string {
+   return "";
+ }
+ 
+-export function getImageSrcSet(image: any): { src: string; srcSet: string } {
++export function getImageSrcSet(image: ImageInput): { src: string; srcSet: string } {
+   const defaultUrl = getImageUrl(image);
+   if (!image || typeof image === "string") {
+     return { src: defaultUrl, srcSet: "" };
+diff --git a/src/utils/cms-client/mappers.ts b/src/utils/cms-client/mappers.ts
+index 8c2764b..5001671 100644
+--- a/src/utils/cms-client/mappers.ts
++++ b/src/utils/cms-client/mappers.ts
+@@ -1,51 +1,52 @@
+ import { DEFAULT_SIZES } from "../commerce-config";
+ import { CmsCategory, CmsProduct, CmsReview } from "./types";
+ 
+-export function normalizeTags(tags: any): string[] {
++export function normalizeTags(tags: unknown): string[] {
+   if (!Array.isArray(tags)) return [];
+-  return tags.map((t: any) => {
++  return tags.map((t: unknown) => {
+     if (typeof t === "string") return t;
+     if (t && typeof t === "object") {
+-      if ("tag" in t) return t.tag;
+-      if ("name" in t) return t.name;
++      if ("tag" in t) return String((t as { tag: unknown }).tag);
++      if ("name" in t) return String((t as { name: unknown }).name);
+     }
+     return String(t);
+   });
+ }
+ 
+-export function normalizeSizes(sizes: any): number[] {
++export function normalizeSizes(sizes: unknown): number[] {
+   const normalized = Array.isArray(sizes)
+-    ? sizes.map((s: any) => {
++    ? sizes.map((s: unknown) => {
+         if (typeof s === "number") return s;
+-        if (s && typeof s === "object" && "size" in s) return Number(s.size);
++        if (s && typeof s === "object" && "size" in s) return Number((s as { size: unknown }).size);
+         return Number(s);
+       }).filter((s: number) => !isNaN(s))
+     : [];
+   return normalized.length > 0 ? normalized : DEFAULT_SIZES;
+ }
+ 
+-export function mapProductDoc(prod: any): CmsProduct {
++export function mapProductDoc(prod: Record<string, unknown>): CmsProduct {
+   return {
+-    ...prod,
++    ...(prod as unknown as CmsProduct),
+     tags: normalizeTags(prod.tags),
+     sizes: normalizeSizes(prod.sizes),
+   };
+ }
+ 
+-export function mapCategoryDoc(cat: any): CmsCategory {
++export function mapCategoryDoc(cat: Record<string, unknown>): CmsCategory {
++  const name = String(cat.name ?? "");
+   return {
+-    name: cat.name,
+-    slug: cat.slug || cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+-    cta: cat.cta,
+-    swatch: cat.swatch,
+-    image: cat.image || "",
++    name,
++    slug: (cat.slug as string) || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
++    cta: cat.cta as string,
++    swatch: cat.swatch as string,
++    image: (cat.image as CmsCategory["image"]) || "",
+   };
+ }
+ 
+-export function mapReviewDoc(rev: any): CmsReview {
++export function mapReviewDoc(rev: Record<string, unknown>): CmsReview {
+   return {
+-    quote: rev.quote,
+-    customerName: rev.customerName,
+-    detail: rev.detail,
++    quote: rev.quote as string,
++    customerName: rev.customerName as string,
++    detail: rev.detail as string,
+   };
+ }
+diff --git a/src/utils/cms-client/orders.test.ts b/src/utils/cms-client/orders.test.ts
+index 5ef4aa8..872af25 100644
+--- a/src/utils/cms-client/orders.test.ts
++++ b/src/utils/cms-client/orders.test.ts
+@@ -85,7 +85,7 @@ describe("getOrders", () => {
+     };
+     const cmsOrder = { ...orderInput, id: "cms-1", status: "pending", createdAt: "2026-01-02", updatedAt: "" };
+     localStorage.setItem("local_orders", JSON.stringify([localOrder]));
+-    (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(async (url: any) => ({
++    (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(async (url: RequestInfo | URL) => ({
+       ok: true,
+       json: async () => {
+         expect(String(url)).toContain("/api/orders/lookup");
+diff --git a/src/utils/cms-client/orders.ts b/src/utils/cms-client/orders.ts
+index 7ab11da..2b33b85 100644
+--- a/src/utils/cms-client/orders.ts
++++ b/src/utils/cms-client/orders.ts
+@@ -41,10 +41,10 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
+ 
+ export async function getOrders(email: string): Promise<CmsOrder[]> {
+   const cleanEmail = email.trim().toLowerCase();
+-  let localOrders: CmsOrder[] = [];
++  let localOrders: CmsOrder[];
+   try {
+-    localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]")
+-      .filter((o: any) => o.email.trim().toLowerCase() === cleanEmail);
++    localOrders = (JSON.parse(localStorage.getItem("local_orders") || "[]") as CmsOrder[])
++      .filter((o) => o.email.trim().toLowerCase() === cleanEmail);
+   } catch {
+     localOrders = [];
+   }
+diff --git a/src/utils/cms-client/types.ts b/src/utils/cms-client/types.ts
+index a3af7ef..c076be3 100644
+--- a/src/utils/cms-client/types.ts
++++ b/src/utils/cms-client/types.ts
+@@ -90,6 +90,16 @@ export interface CmsReview {
+   detail: string;
+ }
+ 
++export interface CmsOrderItem {
++  id: string;
++  name: string;
++  price: string;
++  size: number;
++  color: string;
++  image: string;
++  quantity: number;
++}
++
+ export interface CmsOrder {
+   id: string;
+   orderToken?: string;
+@@ -99,7 +109,7 @@ export interface CmsOrder {
+   shippingCity: string;
+   shippingState: string;
+   shippingZip: string;
+-  items: any[];
++  items: CmsOrderItem[];
+   subtotal: number;
+   tax: number;
+   shipping: number;

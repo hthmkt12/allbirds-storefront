@@ -138,8 +138,8 @@ export function ProductDetailView({
         <span aria-current="page">{product.name}</span>
       </nav>
 
-      <div className="pdp-container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
-        
+      <div className="pdp-container">
+
         {/* Left Column: Colorway Image Gallery */}
         <div className="pdp-gallery-column">
           <div 

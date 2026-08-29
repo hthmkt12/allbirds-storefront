@@ -185,7 +185,6 @@ export default function App() {
       onUpdateQuantity={updateQuantity}
       onRemoveItem={removeFromCart}
       onNavigate={navigate}
-      onAddToCart={addToCart}
     />
   );
 

@@ -486,25 +486,46 @@ After every bug fix, append a new entry using this format:
 - No visible error: the app degrades silently to mock data on every fetch.
 
 ### Root Cause
-- The deployed EmDash backend (`https://allbirds-emdash-backend.worldnew.workers.dev`) serves the root page (200) but returns 404 for every data route the frontend calls.
-- `emdash-backend/src/pages/` implements only one API route: `api/orders/lookup.ts`, and that route returns a hardcoded empty result (`{ docs: [] }`, not wired to D1).
-- The six content endpoints the frontend expects in `src/utils/cms-client/collections.ts` do not exist on the backend: `/api/hero-blocks`, `/api/categories`, `/api/products`, `/api/promo-tiles`, `/api/materials`, `/api/reviews`.
-- The order-create endpoint `POST /api/orders` used by `src/utils/cms-client/orders.ts` also does not exist.
-- Net effect: the "API Integration" milestone is DONE only on the frontend/client side; the active backend does not fulfill the API contract in PROJECT.md.
+- The deployed EmDash backend (`https://allbirds-emdash-backend.worldnew.workers.dev`) served root page (200) but returned 404 for every data route called by frontend.
+- `emdash-backend/src/pages/api/` implemented only `orders/lookup.ts` returning empty docs stub.
 
 ### Common Triggers
-- Loading the storefront against the default `CMS_BASE_URL` (deployed Workers endpoint) with no `VITE_CMS_URL` override.
-- Any `GET ${CMS_BASE_URL}/api/*` content request; any checkout order submission.
+- Fetching dynamic content from CMS or placing orders through checkout.
 
 ### Solutions
-- NOT YET FIXED (analysis only, per owner decision). Options to resolve, in scope order:
-  1. Implement the six content routes + `POST /api/orders` in `emdash-backend/src/pages/api/`, backed by the D1 database (`allbirds-emdash-db`), and seed it (`emdash-backend/seed-allbirds.ts`).
-  2. Wire `api/orders/lookup.ts` to read real orders from D1 instead of returning `{ docs: [] }`.
-  3. If the backend is intentionally deferred, update PROJECT.md/README to state the storefront currently runs on mock data and the content APIs are not yet served.
+- Created D1 schema migrations (`0001_content_tables.sql`, `0002_orders_tables.sql`) for 7 tables (`hero_blocks`, `categories`, `products`, `promo_tiles`, `materials`, `reviews`, `orders`, `order_items`).
+- Implemented 6 content GET API routes (`hero-blocks.ts`, `categories.ts`, `products.ts`, `promo-tiles.ts`, `materials.ts`, `reviews.ts`) with CORS headers.
+- Implemented `POST /api/orders` with server-side validation and D1 batch insertion.
+- Updated `GET /api/orders/lookup` with real D1 query matching email and token.
+- Created D1 seed generator script (`scripts/seed-d1.ts`) and SQL seed file (`scripts/seed-d1.sql`).
 
 ### Verification
-- Observed via `Invoke-WebRequest`: `GET /` -> 200 (HTML); `GET /api/products`, `/api/hero-blocks`, `/api/categories`, `/api/orders` -> 404.
-- Confirmed by inspection: `emdash-backend/src/pages/api/` contains only `orders/lookup.ts`; that handler returns a hardcoded empty `docs` array.
-- Frontend contract confirmed in `src/utils/cms-client/collections.ts` (6 GET endpoints) and `src/utils/cms-client/orders.ts` (POST `/api/orders`, GET `/api/orders/lookup`).
+- `astro build` with both `@astrojs/node` and `@astrojs/cloudflare` targets compiled with 0 errors.
+- Root storefront `npm run build` and `npm test` (56/56 tests) passed.
+
+## 2026-08-29 - Cloudflare Workers D1 runtime binding resolution and Edge Cache
+
+### Symptoms
+- Astro API routes deployed to Cloudflare Workers returned HTTP 500 while static/SSR root page `/` returned HTTP 200.
+- `GET /api/products`, `GET /api/orders/lookup`, and `POST /api/orders` failed with internal server error on live edge endpoint.
+
+### Root Cause
+- Astro v6/v7 removed `Astro.locals.runtime.env` access pattern in favor of standard `cloudflare:workers` module import (`import { env } from "cloudflare:workers"`).
+- Calling `locals.runtime?.env` in `getDb` threw an unhandled runtime error inside Cloudflare Worker execution context.
+
+### Common Triggers
+- Deploying Astro with `@astrojs/cloudflare` adapter to Cloudflare Workers and attempting to read D1 database bindings from `Astro.locals.runtime.env`.
+
+### Solutions
+- Updated `emdash-backend/src/lib/db.ts` to import `env` from `cloudflare:workers` directly and resolve `env.DB` cleanly.
+- Configured Edge Caching with `Cache-Control: public, max-age=300, s-maxage=3600` on content GET API responses (`lib/cors.ts`).
+- Set Cloudflare `account_id` in `emdash-backend/wrangler.jsonc` to support headless CLI deployments.
+
+### Verification
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/products` (HTTP 200 with 8 products).
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/orders` (HTTP 201 Created).
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/orders/lookup` (HTTP 200 OK).
+- Ran all Playwright E2E tests (`npx playwright test`) and Vitest suites (56/56 passed).
+
 
 

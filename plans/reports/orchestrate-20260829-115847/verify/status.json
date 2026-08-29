@@ -1,0 +1,16 @@
+﻿{
+  "id": "verify",
+  "runtime": "coordinator-subprocess",
+  "model": null,
+  "agent": null,
+  "task": "verify",
+  "capabilityTier": "C1",
+  "riskTier": "R0",
+  "status": "success",
+  "exitCode": 0,
+  "durationMs": null,
+  "timedOut": false,
+  "attempts": 1,
+  "worktree": null,
+  "checks": { "lint": 0, "build": 0, "test": 0 }
+}

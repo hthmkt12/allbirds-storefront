@@ -1,3 +1,5 @@
+import { useDrawerA11y } from "../utils/use-drawer-a11y";
+
 interface SizeGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,17 +17,23 @@ const SIZE_ROWS = [
 ];
 
 export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
+  const panelRef = useDrawerA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   return (
     <div
       className="size-guide-modal-overlay"
       onClick={onClose}
-      role="dialog"
-      aria-label="Size Guide"
-      aria-modal="true"
     >
-      <div className="size-guide-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={panelRef}
+        className="size-guide-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="Size Guide"
+        aria-modal="true"
+      >
         <h2>Size Guide</h2>
         <table>
           <thead>

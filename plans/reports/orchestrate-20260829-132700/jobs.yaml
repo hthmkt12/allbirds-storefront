@@ -1,0 +1,32 @@
+version: 1
+concurrency: 2
+jobs:
+  - id: plan-frontend-fixes
+    runtime: internal
+    agent: planner
+    task: plan
+    cwd: C:/Users/manhpc/orca/workspaces/Allbirds/catfish
+    prompt: |
+      Lập kế hoạch sửa các vấn đề Frontend & UI/UX đã phát hiện:
+      1. Responsive PDP layout: Chuyển inline grid sang class `.pdp-container` trong `src/styles.css` và responsive `1fr` trên mobile.
+      2. Dynamic size selection: Loại bỏ hardcoded size 9 trong `src/components/wishlist-drawer.tsx` và size 8 trong `src/components/cart-drawer.tsx`.
+      3. A11y & Focus trap: Bổ sung focus trap, Escape handler cho `src/components/size-guide-modal.tsx`, sửa contrast màu `#5cb85c`.
+      4. Client performance & storage: Thay `alert()` bằng inline notice trong checkout, chống N+1 request order lookup.
+      Trả về file kế hoạch chi tiết, acceptance criteria và danh sách file cần sửa.
+    timeout: 10m
+    expected_output: "Kế hoạch chi tiết sửa Frontend & UI/UX"
+
+  - id: plan-backend-emdash
+    runtime: internal
+    agent: planner
+    task: plan
+    cwd: C:/Users/manhpc/orca/workspaces/Allbirds/catfish
+    prompt: |
+      Lập kế hoạch triển khai EmDash Backend trên Cloudflare Workers + D1 (`allbirds-emdash-db`):
+      1. Thiết lập D1 Schema: Bảng cho 6 collections (`heroBlocks`, `categories`, `products`, `promoTiles`, `materials`, `reviews`) và bảng `orders`.
+      2. Viết 6 Astro API content routes trong `emdash-backend/src/pages/api/` (`hero-blocks.ts`, `categories.ts`, `products.ts`, `promo-tiles.ts`, `materials.ts`, `reviews.ts`).
+      3. Viết `POST /api/orders` (server-side validation/tax/totals) và hoàn thiện `GET /api/orders/lookup?email=&token=`.
+      4. Script seed dữ liệu vào D1 từ `src/data/allbirds-data.ts`.
+      Trả về kiến trúc routes, schema D1 và các bước triển khai.
+    timeout: 10m
+    expected_output: "Kế hoạch triển khai EmDash Backend + D1 API"

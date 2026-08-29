@@ -21,7 +21,6 @@ export interface CartDrawerProps {
   onUpdateQuantity: (id: string, delta: number) => void;
   onRemoveItem: (id: string) => void;
   onNavigate: (path: string) => void;
-  onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
 }
 
 export function CartDrawer({
@@ -31,7 +30,6 @@ export function CartDrawer({
   onUpdateQuantity,
   onRemoveItem,
   onNavigate,
-  onAddToCart,
 }: CartDrawerProps) {
   // 1. Calculate subtotal
   const subtotal = useMemo(() => {
@@ -110,16 +108,13 @@ export function CartDrawer({
                       <button
                         type="button"
                         className="pill-button"
-                        onClick={() => onAddToCart({
-                          name: prod.name,
-                          price: prod.price,
-                          size: 8, // default size
-                          color: prod.color,
-                          image: prod.image,
-                        })}
+                        onClick={() => {
+                          onNavigate(`/products/${encodeURIComponent(prod.name)}`);
+                          onClose();
+                        }}
                         style={{ padding: "4px 12px", minHeight: "30px", fontSize: "11px", background: "var(--charcoal)", color: "var(--canvas)", border: "none" }}
                       >
-                        Add to Bag
+                        View Product
                       </button>
                     </div>
                   ))}
@@ -215,16 +210,13 @@ export function CartDrawer({
                         <button
                           type="button"
                           className="pill-button"
-                          onClick={() => onAddToCart({
-                            name: prod.name,
-                            price: prod.price,
-                            size: 8, // default size
-                            color: prod.color,
-                            image: prod.image,
-                          })}
+                          onClick={() => {
+                            onNavigate(`/products/${encodeURIComponent(prod.name)}`);
+                            onClose();
+                          }}
                           style={{ padding: "4px 12px", minHeight: "30px", fontSize: "11px", background: "var(--charcoal)", color: "var(--canvas)", border: "none" }}
                         >
-                          Add to Bag
+                          View Product
                         </button>
                       </div>
                     ))}

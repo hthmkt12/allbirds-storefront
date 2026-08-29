@@ -21,12 +21,14 @@ describe("SizeGuideModal Component", () => {
 
   it("calls onClose when clicking close button or overlay", () => {
     const onClose = vi.fn();
-    render(<SizeGuideModal isOpen={true} onClose={onClose} />);
+    const { container } = render(<SizeGuideModal isOpen={true} onClose={onClose} />);
 
     fireEvent.click(screen.getByText("Close"));
     expect(onClose).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("dialog"));
+    const overlay = container.querySelector(".size-guide-modal-overlay");
+    expect(overlay).not.toBeNull();
+    if (overlay) fireEvent.click(overlay);
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 });

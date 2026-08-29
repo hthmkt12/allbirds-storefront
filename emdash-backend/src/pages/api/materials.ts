@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { jsonResponse, errorResponse } from "../../lib/cors";
+import { jsonResponse, errorResponse, contentCacheHeaders } from "../../lib/cors";
 
 export const prerender = false;
 
@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ locals }) => {
       textureImage: row.texture_image || undefined,
       sourceRegion: row.source_region || undefined,
     }));
-    return jsonResponse({ docs });
+    return jsonResponse({ docs }, 200, contentCacheHeaders);
   } catch (err: any) {
     return errorResponse(err.message || "Failed to fetch materials", 500);
   }

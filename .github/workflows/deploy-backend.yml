@@ -1,0 +1,51 @@
+name: Deploy EmDash Backend to Cloudflare Workers
+
+on:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'emdash-backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    name: Build, Migrate & Deploy EmDash Worker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: emdash-backend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ./emdash-backend
+        run: npm ci
+
+      - name: Build EmDash Backend for Cloudflare Workers
+        working-directory: ./emdash-backend
+        run: npm run build
+        env:
+          DEPLOY_TARGET: cloudflare
+
+      - name: Apply D1 Schema Migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'emdash-backend'
+          command: 'd1 execute allbirds-emdash-db --remote --file=migrations/0001_content_tables.sql && npx wrangler d1 execute allbirds-emdash-db --remote --file=migrations/0002_orders_tables.sql'
+
+      - name: Deploy Worker to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'emdash-backend'
+          command: 'deploy'

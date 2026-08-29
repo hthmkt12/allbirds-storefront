@@ -78,4 +78,54 @@ describe("App cart flow (offline CMS fallback)", () => {
     expect(cart.querySelectorAll(".cart-item")).toHaveLength(0);
     expect(JSON.parse(localStorage.getItem("cart") || "[]")).toHaveLength(0);
   });
+
+  it("navigates to checkout and completes payment successfully", async () => {
+    render(<App />);
+    await screen.findByText(mockProducts[0].name);
+
+    // 1. Add product to cart
+    const firstCard = firstProductCard();
+    fireEvent.click(within(firstCard).getByRole("button", { name: "8" }));
+    fireEvent.click(within(firstCard).getByRole("button", { name: "Add to Bag" }));
+
+    // 2. Click Proceed to Checkout
+    const cartDialog = screen.getByRole("dialog", { name: "Shopping Cart" });
+    const checkoutBtn = within(cartDialog).getByRole("button", { name: "Proceed to Checkout" });
+    fireEvent.click(checkoutBtn);
+
+    // 3. Verify Checkout Form appears
+    const emailInput = await screen.findByLabelText("Email");
+    const nameInput = screen.getByLabelText("Full Name");
+    const addressInput = screen.getByLabelText("Street Address");
+    const cityInput = screen.getByLabelText("City");
+    const stateInput = screen.getByLabelText("State");
+    const zipInput = screen.getByLabelText("Zip Code");
+
+    fireEvent.change(emailInput, { target: { value: "customer@example.com" } });
+    fireEvent.change(nameInput, { target: { value: "John Doe" } });
+    fireEvent.change(addressInput, { target: { value: "123 Green St" } });
+    fireEvent.change(cityInput, { target: { value: "San Francisco" } });
+    fireEvent.change(stateInput, { target: { value: "CA" } });
+    fireEvent.change(zipInput, { target: { value: "94107" } });
+
+    // 4. Continue to Payment
+    const continueBtn = screen.getByRole("button", { name: /continue to payment/i });
+    fireEvent.click(continueBtn);
+
+    // 5. Fill Card details and Place Order
+    const cardInput = await screen.findByLabelText(/Card Number/i);
+    const expInput = screen.getByLabelText(/Expiration/i);
+    const cvvInput = screen.getByLabelText(/CVV\/CVC/i);
+
+    fireEvent.change(cardInput, { target: { value: "4242 4242 4242 4242" } });
+    fireEvent.change(expInput, { target: { value: "12/28" } });
+    fireEvent.change(cvvInput, { target: { value: "123" } });
+
+    const payBtn = screen.getByRole("button", { name: /place order/i });
+    fireEvent.click(payBtn);
+
+    // 6. Confirmation screen
+    expect(await screen.findByText(/Order Placed Successfully!/i, {}, { timeout: 4000 })).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem("cart") || "[]")).toHaveLength(0);
+  });
 });

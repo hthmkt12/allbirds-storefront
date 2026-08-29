@@ -430,6 +430,54 @@ After every bug fix, append a new entry using this format:
 - Note for deployment: root ESLint config now explicitly scoped to storefront only.
 - Follow-up (same day): added security headers via `vercel.json` + `nginx.conf` (nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS on Vercel; CSP intentionally deferred because the CMS origin is not fixed at build time) and an in-memory app-level rate limit (5 creates/min/IP) in `Orders.beforeChange` for the public create endpoint — edge/proxy limiting remains the recommended first line.
 
+## 2026-08-29 - createOrder had no timeout and unguarded local_orders parse
+
+### Symptoms
+- Placing an order ("Place Order") could hang indefinitely when the CMS was reachable but unresponsive: the request never resolved, so neither the success path nor the local fallback ran.
+- If `localStorage["local_orders"]` held corrupt JSON, `createOrder` threw on both the success and the fallback path, losing an order that the CMS had already accepted.
+
+### Root Cause
+- `cms-client/orders.ts` `createOrder` used a bare `fetch` with no `AbortController`, while every other CMS call used `fetchWithTimeout` (2s). No timeout meant a stalled CMS connection never rejected, so the `catch` fallback never triggered.
+- The two `JSON.parse(localStorage.getItem("local_orders") || "[]")` calls inside `createOrder` (success path and fallback path) were not wrapped, unlike `getOrders` which already guarded the same key. Corrupt storage threw before the order could be persisted or returned.
+
+### Common Triggers
+- Checkout against a CMS that accepts the TCP connection but never responds (hung backend, proxy stall).
+- Any prior write leaving `local_orders` non-JSON or non-array (manual edit, partial write, foreign data).
+
+### Solutions
+- Switched `createOrder` to `fetchWithTimeout` so the request aborts after 2s and falls back to a local pending order, matching the rest of the client.
+- Added a shared `readLocalOrders()` helper that parses `local_orders` defensively (returns `[]` on parse error or non-array) and used it in both `createOrder` paths and in `getOrders` (replacing its inline try/catch).
+- Files changed: `src/utils/cms-client/orders.ts`, `src/utils/cms-client/orders.test.ts`.
+
+### Verification
+- Added unit tests: abort signal wiring on `createOrder`, and corrupt-`local_orders` recovery on both `createOrder` paths and `getOrders`.
+- `npx vitest run src/utils/cms-client/orders.test.ts` → 9/9 passed.
+- Full suite: `npm test` → 56/56 passed. `npm run build` clean (exit 0). `npm run lint` clean.
+
+## 2026-08-29 - Dependency audit cleanup and .env gitignore hardening
+
+### Symptoms
+- `npm audit` reported 4 vulnerabilities (3 high + 1 low): `postcss`, `nanoid`, `sharp` (high) and `esbuild` (low).
+- Root `.gitignore` had no general `.env` rule (only `emdash-backend/.env`), so a `.env` created at the storefront root would not be ignored.
+
+### Root Cause
+- Transitive/dev dependencies drifted behind their patched versions. `sharp` (direct devDependency used only by `scripts/*.js` image tooling) trailed the libvips security fixes and required a SemVer-major bump.
+- The storefront root lacked a catch-all `.env` ignore, a latent secret-exposure risk (no real `.env` was tracked — only `.env.example`).
+
+### Common Triggers
+- Running `npm audit`; creating a local `.env` at the repo root for Vite.
+
+### Solutions
+- `npm audit fix` patched `postcss` and `nanoid` in range (no breaking change).
+- `npm audit fix --force` bumped `sharp` 0.34.5 → 0.35.4 (SemVer major). The scripts use only stable sharp APIs (`metadata`, `resize`, `webp`, `avif`, `toFile`, `extract`), unaffected by 0.35.
+- `.gitignore`: added `.env`, `.env.local`, `.env.*.local` (kept `.env.example` tracked).
+- Remaining: 1 low `esbuild` advisory (dev-server-only, Windows, transitive via vite; not a production/runtime risk) — left as-is.
+
+### Verification
+- `node scripts/test-sharp.js` → "Sharp import successful!"; `node scripts/crop-images.js` regenerated all 4 crops successfully on 0.35.4 (verification output reverted to keep the diff clean).
+- `npm ls sharp` → sharp@0.35.4. `git check` confirmed `.env.example` still tracked.
+- `npm run build` clean (exit 0). `npm test` → 56/56 passed. `npm run lint` clean. `npm audit` → 1 low remaining.
+
 
 
 

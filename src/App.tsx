@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import {
   CategoryStrip,
   Hero,
@@ -15,12 +15,24 @@ import { categories } from "./data/allbirds-data";
 import { ProductListingPage } from "./components/product-listing-page";
 import { CartDrawer, CartItem } from "./components/cart-drawer";
 import { ProductDetailView } from "./components/product-detail-view";
-import { CheckoutView } from "./components/checkout/checkout-view";
-import { SearchDialog } from "./components/search-dialog";
-import { AccountDrawer } from "./components/account-drawer";
-import { HelpDrawer } from "./components/help-drawer";
-import { WishlistDrawer } from "./components/wishlist-drawer";
 import { useWishlist } from "./utils/use-wishlist";
+
+// Lazy-loaded components for bundle optimization
+const CheckoutView = lazy(() =>
+  import("./components/checkout/checkout-view").then((m) => ({ default: m.CheckoutView }))
+);
+const SearchDialog = lazy(() =>
+  import("./components/search-dialog").then((m) => ({ default: m.SearchDialog }))
+);
+const AccountDrawer = lazy(() =>
+  import("./components/account-drawer").then((m) => ({ default: m.AccountDrawer }))
+);
+const HelpDrawer = lazy(() =>
+  import("./components/help-drawer").then((m) => ({ default: m.HelpDrawer }))
+);
+const WishlistDrawer = lazy(() =>
+  import("./components/wishlist-drawer").then((m) => ({ default: m.WishlistDrawer }))
+);
 
 export default function App() {
   const [audience, setAudience] = useState("Shop Men");
@@ -150,7 +162,7 @@ export default function App() {
 
   // Shared overlays rendered on every route
   const renderOverlays = () => (
-    <>
+    <Suspense fallback={null}>
       <SearchDialog isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onNavigate={navigate} />
       <AccountDrawer isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
@@ -162,7 +174,7 @@ export default function App() {
         onAddToCart={addToCart}
         onNavigate={navigate}
       />
-    </>
+    </Suspense>
   );
 
   const cartDrawer = (
@@ -207,7 +219,18 @@ export default function App() {
     return (
       <>
         <SiteHeader {...headerProps} />
-        <CheckoutView cart={cart} onNavigate={navigate} onClearCart={clearCart} />
+        <Suspense
+          fallback={
+            <div className="checkout-view" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center", color: "var(--iron)", padding: "48px" }}>
+                <div style={{ width: "32px", height: "32px", border: "3px solid var(--cloud)", borderTopColor: "var(--charcoal)", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+                <p style={{ fontSize: "15px", fontWeight: 500 }}>Loading secure checkout...</p>
+              </div>
+            </div>
+          }
+        >
+          <CheckoutView cart={cart} onNavigate={navigate} onClearCart={clearCart} />
+        </Suspense>
         {renderOverlays()}
       </>
     );

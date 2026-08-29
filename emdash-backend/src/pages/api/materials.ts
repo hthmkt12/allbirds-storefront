@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { jsonResponse, errorResponse, contentCacheHeaders } from "../../lib/cors";
+import { getDb } from "../../lib/db";
 
 export const prerender = false;
 
@@ -12,7 +13,7 @@ interface MaterialRow {
 }
 
 export const GET: APIRoute = async ({ locals }) => {
-  const db = (locals as { runtime?: { env?: { DB?: any } } }).runtime?.env?.DB;
+  const db = getDb(locals);
   if (!db) {
     return errorResponse("Database unavailable", 503);
   }

@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { jsonResponse, errorResponse } from "../../../lib/cors";
+import { getDb } from "../../../lib/db";
 
 export const prerender = false;
 
@@ -46,7 +47,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   const cleanEmail = email.trim().toLowerCase();
   const cleanToken = token.trim();
 
-  const db = (locals as { runtime?: { env?: { DB?: any } } }).runtime?.env?.DB;
+  const db = getDb(locals);
   if (!db) {
     return errorResponse("Database unavailable", 503);
   }

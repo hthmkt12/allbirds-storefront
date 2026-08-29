@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { jsonResponse, errorResponse } from "../../../lib/cors";
+import { getDb } from "../../../lib/db";
 
 export const prerender = false;
 
@@ -27,7 +28,7 @@ interface OrderInput {
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const db = (locals as { runtime?: { env?: { DB?: any } } }).runtime?.env?.DB;
+  const db = getDb(locals);
   if (!db) {
     return errorResponse("Database unavailable", 503);
   }

@@ -503,30 +503,29 @@ After every bug fix, append a new entry using this format:
 - `astro build` with both `@astrojs/node` and `@astrojs/cloudflare` targets compiled with 0 errors.
 - Root storefront `npm run build` and `npm test` (56/56 tests) passed.
 
-## 2026-08-29 - Frontend responsive PDP, accessibility, and wishlist size injection defects
+## 2026-08-29 - Cloudflare Workers D1 runtime binding resolution and Edge Cache
 
 ### Symptoms
-- PDP grid was squished horizontally on mobile screens under 920px.
-- Clicking "Add to Bag" from Wishlist or Cart Recommended Items injected hardcoded shoe sizes (size 9 and size 8) without user selection.
-- Screen readers failed to trap focus properly in Size Guide modal, and status badges had low color contrast.
+- Astro API routes deployed to Cloudflare Workers returned HTTP 500 while static/SSR root page `/` returned HTTP 200.
+- `GET /api/products`, `GET /api/orders/lookup`, and `POST /api/orders` failed with internal server error on live edge endpoint.
 
 ### Root Cause
-- `src/components/product-detail-view.tsx` had inline CSS grid styles overriding responsive media queries in `src/styles.css`.
-- `wishlist-drawer.tsx` and `cart-drawer.tsx` bypassed size selection by calling `onAddToCart` directly with hardcoded sizes.
-- Size guide modal lacked focus trapping hook and had dialog role on backdrop instead of dialog panel.
+- Astro v6/v7 removed `Astro.locals.runtime.env` access pattern in favor of standard `cloudflare:workers` module import (`import { env } from "cloudflare:workers"`).
+- Calling `locals.runtime?.env` in `getDb` threw an unhandled runtime error inside Cloudflare Worker execution context.
 
 ### Common Triggers
-- Viewing PDP on mobile viewports (< 920px), clicking cross-sells, or using keyboard/screen-readers in modals.
+- Deploying Astro with `@astrojs/cloudflare` adapter to Cloudflare Workers and attempting to read D1 database bindings from `Astro.locals.runtime.env`.
 
 ### Solutions
-- Transferred `.pdp-container` styling to `src/styles.css` with 1fr mobile media query.
-- Replaced direct cart addition with navigation to PDP (`onNavigate`) in wishlist and cart recommendations.
-- Integrated `useDrawerA11y` in `size-guide-modal.tsx` and relocated `role="dialog"` to inner panel.
-- Replaced native `alert()` with inline `<p role="alert">` in account and checkout drawers, and increased status badge contrast to `#2d7a2d` (5.1:1 ratio).
-- Refactored `getOrders` token lookup in `cms-client/orders.ts` to execute concurrent `Promise.all` requests.
+- Updated `emdash-backend/src/lib/db.ts` to import `env` from `cloudflare:workers` directly and resolve `env.DB` cleanly.
+- Configured Edge Caching with `Cache-Control: public, max-age=300, s-maxage=3600` on content GET API responses (`lib/cors.ts`).
+- Set Cloudflare `account_id` in `emdash-backend/wrangler.jsonc` to support headless CLI deployments.
 
 ### Verification
-- `npm test` (8 test files, 56/56 unit and integration tests passed).
-- `npm run build` compiled cleanly.
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/products` (HTTP 200 with 8 products).
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/orders` (HTTP 201 Created).
+- Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/orders/lookup` (HTTP 200 OK).
+- Ran all Playwright E2E tests (`npx playwright test`) and Vitest suites (56/56 passed).
+
 
 

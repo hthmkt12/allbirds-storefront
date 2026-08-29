@@ -2,9 +2,18 @@ import { CMS_BASE_URL } from "../commerce-config";
 import { CmsOrder } from "./types";
 import { fetchWithTimeout } from "./fetch";
 
+function readLocalOrders(): CmsOrder[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem("local_orders") || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<CmsOrder> {
   try {
-    const res = await fetch(`${CMS_BASE_URL}/api/orders`, {
+    const res = await fetchWithTimeout(`${CMS_BASE_URL}/api/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -15,7 +24,7 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
     const data = await res.json();
     if (data && data.doc) {
       // Save to local storage for offline tracking/caching
-      const localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]");
+      const localOrders = readLocalOrders();
       localOrders.push(data.doc);
       localStorage.setItem("local_orders", JSON.stringify(localOrders));
       return data.doc;
@@ -32,7 +41,7 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    const localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]");
+    const localOrders = readLocalOrders();
     localOrders.push(mockOrder);
     localStorage.setItem("local_orders", JSON.stringify(localOrders));
     return mockOrder;
@@ -41,13 +50,9 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
 
 export async function getOrders(email: string): Promise<CmsOrder[]> {
   const cleanEmail = email.trim().toLowerCase();
-  let localOrders: CmsOrder[] = [];
-  try {
-    localOrders = JSON.parse(localStorage.getItem("local_orders") || "[]")
-      .filter((o: any) => o.email.trim().toLowerCase() === cleanEmail);
-  } catch {
-    localOrders = [];
-  }
+  const localOrders = readLocalOrders().filter(
+    (o) => o.email.trim().toLowerCase() === cleanEmail,
+  );
 
   // Guests cannot list orders (read is admin-only); refresh each locally-known
   // order through the token-protected /lookup endpoint instead.

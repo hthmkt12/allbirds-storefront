@@ -1,15 +1,16 @@
 # Project: Allbirds E-Commerce Storefront & Payload CMS Integration
 
 ## Architecture
-- **Frontend Storefront**: React + Vite application running on client (default port 5173). It fetches content dynamically from the Payload CMS API endpoints.
-- **Payload CMS**: A Node-based CMS running locally in `F:/Allbirds/payload-cms` (default port 3000), using SQLite with local storage.
-- **Database**: SQLite database file located in `F:/Allbirds/payload-cms/payload.db`.
-- **E2E Tests**: Comprehensive test suite under `F:/Allbirds/e2e-tests` covering PDP, Cart, CMS syncing, and accessibility.
+- **Frontend Storefront**: React + Vite application running on client (default port 5173). It fetches content dynamically from the CMS API endpoints and falls back to local mock data when the CMS is unreachable.
+- **CMS Backend (EmDash)**: An Astro-based backend deployed to Cloudflare Workers, backed by a Cloudflare D1 database (`allbirds-emdash-db`). Source lives under `emdash-backend/`. The storefront targets the deployed edge endpoint by default (`https://allbirds-emdash-backend.worldnew.workers.dev`), overridable via the `VITE_CMS_URL` env var.
+- **Database**: Cloudflare D1 (`allbirds-emdash-db`, binding `DB`) bound to the Worker.
+- **E2E Tests**: Comprehensive test suite under `e2e-tests/` covering PDP, Cart, CMS syncing, and accessibility.
+- **Legacy backend (deprecated)**: The original Payload CMS + SQLite implementation under `payload-cms/` is retained for reference only and is no longer the active backend.
 
 ## Code Layout
-- Frontend: `F:/Allbirds/src/`
-- CMS Source: `F:/Allbirds/payload-cms/`
-- Tests: `F:/Allbirds/e2e-tests/`
+- Frontend: `src/`
+- CMS Source: `emdash-backend/` (active); `payload-cms/` (deprecated, legacy)
+- Tests: `e2e-tests/`
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status | Conversation ID |

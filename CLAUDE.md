@@ -1,6 +1,6 @@
 # Allbirds Storefront
 
-Interactive Allbirds-style e-commerce storefront built with React, Vite, and TypeScript. The project is intended to integrate with a local Payload CMS backed by SQLite for dynamic content.
+Interactive Allbirds-style e-commerce storefront built with React, Vite, and TypeScript. The project integrates with an EmDash CMS backend (Astro on Cloudflare Workers + D1) for dynamic content, with local mock data as a fallback.
 
 ## Language
 
@@ -10,9 +10,9 @@ Always respond in the same language as the user's prompt. If the user writes in 
 
 **Frontend:** React 19, Vite 7, TypeScript, lucide-react.
 
-**CMS target:** Local Payload CMS under `F:/Allbirds/payload-cms`, SQLite database at `F:/Allbirds/payload-cms/payload.db`.
+**CMS target:** EmDash CMS backend under `emdash-backend/` (Astro on Cloudflare Workers + D1). The storefront defaults to the deployed endpoint `https://allbirds-emdash-backend.worldnew.workers.dev`, overridable via the `VITE_CMS_URL` env var. The `payload-cms/` folder is a deprecated legacy backend kept for reference only.
 
-**Tests target:** E2E tests under `F:/Allbirds/e2e-tests`.
+**Tests target:** E2E tests under `e2e-tests/`.
 
 ## Project Structure
 

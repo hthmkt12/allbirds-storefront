@@ -196,7 +196,7 @@ export function CheckoutView({ cart, onNavigate, onClearCart }: CheckoutViewProp
             onNavigate("/checkout/confirmation");
           } catch (err) {
             console.error("Error creating order with QR:", err);
-            alert("Error placing order. Please try again.");
+            setPaymentError("Error placing order. Please try again.");
             setShowQrModal(false);
           }
         }, 3000);

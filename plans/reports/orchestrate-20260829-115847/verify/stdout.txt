@@ -1,0 +1,43 @@
+===== lint (exit=0) =====
+
+> allbirds-natural-materials-storefront@0.1.0 lint
+> eslint src
+
+
+===== build (exit=0) =====
+
+> allbirds-natural-materials-storefront@0.1.0 build
+> tsc -b && vite build
+
+[36mvite v7.3.5 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mG£ô[39m 1717 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                          [39m[1m[2m  1.40 kB[22m[1m[22m[2m Göé gzip:  0.53 kB[22m
+[2mdist/[22m[35massets/index-Ct8g5os6.css           [39m[1m[2m 18.24 kB[22m[1m[22m[2m Göé gzip:  4.12 kB[22m
+[2mdist/[22m[36massets/help-drawer-BmyEZU4f.js      [39m[1m[2m  1.58 kB[22m[1m[22m[2m Göé gzip:  0.87 kB[22m
+[2mdist/[22m[36massets/orders-DTSceOYM.js           [39m[1m[2m  2.18 kB[22m[1m[22m[2m Göé gzip:  1.06 kB[22m
+[2mdist/[22m[36massets/wishlist-drawer-uTDWaso_.js  [39m[1m[2m  2.22 kB[22m[1m[22m[2m Göé gzip:  0.94 kB[22m
+[2mdist/[22m[36massets/search-dialog-DPwhDg0F.js    [39m[1m[2m  2.85 kB[22m[1m[22m[2m Göé gzip:  1.34 kB[22m
+[2mdist/[22m[36massets/account-drawer--Tu0PMLs.js   [39m[1m[2m  5.99 kB[22m[1m[22m[2m Göé gzip:  1.92 kB[22m
+[2mdist/[22m[36massets/checkout-view-qGwCTuSs.js    [39m[1m[2m 12.08 kB[22m[1m[22m[2m Göé gzip:  3.73 kB[22m
+[2mdist/[22m[36massets/index-BE3PoImZ.js            [39m[1m[2m254.30 kB[22m[1m[22m[2m Göé gzip: 77.57 kB[22m
+[32mG£ô built in 3.01s[39m
+
+===== test (exit=0) =====
+
+> allbirds-natural-materials-storefront@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/manhpc/orca/workspaces/Allbirds/catfish
+
+
+ Test Files  8 passed (8)
+      Tests  51 passed (51)
+   Start at  11:59:12
+   Duration  6.80s (transform 1.12s, setup 1.70s, import 1.32s, tests 4.59s, environment 12.42s)
+
+
+

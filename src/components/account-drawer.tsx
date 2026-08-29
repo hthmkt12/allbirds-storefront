@@ -13,6 +13,7 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
     return localStorage.getItem("customer_email");
   });
   const [signInEmail, setSignInEmail] = useState("");
+  const [signInError, setSignInError] = useState<string | null>(null);
   const [orders, setOrders] = useState<CmsOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
@@ -50,9 +51,10 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
+    setSignInError(null);
     const cleanEmail = signInEmail.trim();
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      alert("Please enter a valid email address");
+      setSignInError("Please enter a valid email address");
       return;
     }
     localStorage.setItem("customer_email", cleanEmail);
@@ -109,7 +111,7 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
                     <div key={order.id} className="order-card" style={{ border: "1px solid var(--line)", borderRadius: "8px", padding: "16px", background: "var(--canvas)" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px", color: "var(--iron)" }}>
                         <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                        <span style={{ textTransform: "capitalize", fontWeight: 600, color: order.status === "delivered" ? "#5cb85c" : "var(--charcoal)" }}>{order.status}</span>
+                        <span style={{ textTransform: "capitalize", fontWeight: 600, color: order.status === "delivered" ? "#2d7a2d" : "var(--charcoal)" }}>{order.status}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, marginBottom: "12px", fontSize: "14px" }}>
                         <span style={{ wordBreak: "break-all", marginRight: "8px" }}>Order #{order.id.slice(-8).toUpperCase()}</span>
@@ -159,9 +161,17 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
                 required
                 placeholder="Enter your email..."
                 value={signInEmail}
-                onChange={(e) => setSignInEmail(e.target.value)}
-                style={{ width: "100%", padding: "12px", fontSize: "14px", border: "1px solid var(--line)", borderRadius: "4px", boxSizing: "border-box", marginBottom: "12px" }}
+                onChange={(e) => {
+                  setSignInEmail(e.target.value);
+                  if (signInError) setSignInError(null);
+                }}
+                style={{ width: "100%", padding: "12px", fontSize: "14px", border: "1px solid var(--line)", borderRadius: "4px", boxSizing: "border-box", marginBottom: signInError ? "6px" : "12px" }}
               />
+              {signInError && (
+                <p role="alert" style={{ color: "#c0392b", fontSize: "12px", margin: "0 0 12px 0" }}>
+                  {signInError}
+                </p>
+              )}
               <button
                 type="submit"
                 className="pill-button"

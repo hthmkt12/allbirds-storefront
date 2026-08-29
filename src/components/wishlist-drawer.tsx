@@ -16,7 +16,7 @@ export function WishlistDrawer({
   onClose,
   wishlist,
   onRemoveItem,
-  onAddToCart,
+  onNavigate,
 }: WishlistDrawerProps) {
   const panelRef = useDrawerA11y(isOpen, onClose);
 
@@ -74,14 +74,8 @@ export function WishlistDrawer({
                     type="button"
                     className="pill-button"
                     onClick={() => {
-                      onAddToCart({
-                        name: item.name,
-                        price: item.price,
-                        size: 9, // default
-                        color: item.color,
-                        image: item.image,
-                      });
-                      onRemoveItem(item.name);
+                      onNavigate(`/products/${encodeURIComponent(item.name)}`);
+                      onClose();
                     }}
                     style={{
                       padding: "6px 12px",
@@ -92,7 +86,7 @@ export function WishlistDrawer({
                       minHeight: "32px",
                     }}
                   >
-                    Move to Bag
+                    View Details
                   </button>
                   <button
                     type="button"

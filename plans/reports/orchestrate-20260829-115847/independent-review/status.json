@@ -1,0 +1,16 @@
+﻿{
+  "id": "independent-review",
+  "runtime": "coordinator-subprocess",
+  "model": null,
+  "agent": null,
+  "task": "review",
+  "capabilityTier": "C3",
+  "riskTier": "R0",
+  "status": "success",
+  "exitCode": 0,
+  "durationMs": null,
+  "timedOut": false,
+  "attempts": 1,
+  "worktree": null,
+  "verdict": "pass-with-notes"
+}

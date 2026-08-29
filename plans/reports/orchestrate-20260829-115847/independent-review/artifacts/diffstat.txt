@@ -1,0 +1,9 @@
+﻿ src/App.tsx                         |  2 +-
+ src/components/filter-sort-bar.tsx  |  4 ++--
+ src/components/responsive-image.tsx |  4 ++--
+ src/utils/cms-client/image.ts       | 13 +++++++++++--
+ src/utils/cms-client/mappers.ts     | 39 +++++++++++++++++++------------------
+ src/utils/cms-client/orders.test.ts |  2 +-
+ src/utils/cms-client/orders.ts      |  6 +++---
+ src/utils/cms-client/types.ts       | 12 +++++++++++-
+ 8 files changed, 51 insertions(+), 31 deletions(-)

@@ -190,39 +190,36 @@ export function PaymentStep({
           }}>
             <h3 style={{ fontSize: "20px", marginBottom: "16px", fontFamily: "var(--serif)" }}>Scan to Pay</h3>
             <div style={{
-              background: "#eee",
-              width: "120px",
-              height: "120px",
+              background: "#fff",
+              width: "160px",
+              height: "160px",
               margin: "0 auto 16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "1px solid #ddd"
+              border: "1px solid #ddd",
+              padding: "8px",
+              borderRadius: "4px"
             }}>
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                <rect width="100" height="100" fill="white" />
-                <rect x="10" y="10" width="20" height="20" fill="black" />
-                <rect x="15" y="15" width="10" height="10" fill="white" />
-                <rect x="70" y="10" width="20" height="20" fill="black" />
-                <rect x="75" y="15" width="10" height="10" fill="white" />
-                <rect x="10" y="70" width="20" height="20" fill="black" />
-                <rect x="15" y="75" width="10" height="10" fill="white" />
-                <rect x="40" y="40" width="20" height="20" fill="black" />
-                <rect x="45" y="45" width="10" height="10" fill="white" />
-                <rect x="70" y="70" width="10" height="10" fill="black" />
-                <rect x="80" y="80" width="10" height="10" fill="black" />
-                <rect x="70" y="80" width="10" height="10" fill="black" />
-                <rect x="80" y="70" width="10" height="10" fill="black" />
-              </svg>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ALLBIRDS-PAY:${encodeURIComponent(txnId)}:AMOUNT:${total}`}
+                alt="Payment QR Code"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                loading="eager"
+              />
             </div>
-            <p style={{ fontSize: "14px", marginBottom: "8px" }}>
-              Total Amount: <strong>${fmt(total)}</strong>
+            <p style={{ fontSize: "14px", marginBottom: "4px" }}>
+              Amount to Pay: <strong>${fmt(total)}</strong>
+            </p>
+            <p style={{ fontSize: "12px", color: "var(--iron)", marginBottom: "4px" }}>
+              Transfer Code: <strong className="qr-txn-id" style={{ color: "var(--charcoal)", letterSpacing: "1px" }}>{txnId}</strong>
             </p>
             <p style={{ fontSize: "12px", color: "var(--iron)" }}>
-              Transaction ID: <span className="qr-txn-id">{txnId}</span>
+              Scan with your Mobile Banking App / E-Wallet
             </p>
-            <p style={{ fontSize: "13px", color: "#27ae60", marginTop: "16px", fontWeight: "bold" }}>
-              Processing payment...
+            <p style={{ fontSize: "13px", color: "#27ae60", marginTop: "16px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#27ae60", animation: "pulse 1.5s infinite" }}></span>
+              Waiting for payment confirmation...
             </p>
           </div>
         </div>

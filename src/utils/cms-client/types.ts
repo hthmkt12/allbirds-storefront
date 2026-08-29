@@ -90,6 +90,16 @@ export interface CmsReview {
   detail: string;
 }
 
+export interface CmsOrderItem {
+  id: string;
+  name: string;
+  price: string;
+  size: number;
+  color: string;
+  image: string;
+  quantity: number;
+}
+
 export interface CmsOrder {
   id: string;
   orderToken?: string;
@@ -99,7 +109,7 @@ export interface CmsOrder {
   shippingCity: string;
   shippingState: string;
   shippingZip: string;
-  items: any[];
+  items: CmsOrderItem[];
   subtotal: number;
   tax: number;
   shipping: number;

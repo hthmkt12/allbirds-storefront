@@ -3,7 +3,7 @@
 [![CI & Quality Gate](https://github.com/hthmkt12/allbirds-storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/hthmkt12/allbirds-storefront/actions/workflows/ci.yml)
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-black?logo=vercel)](https://allbirds-storefront.vercel.app)
 
-An interactive e-commerce storefront modeled on Allbirds, backed by a local [Payload CMS](https://payloadcms.com/) instance and covered by a comprehensive Playwright E2E test suite.
+An interactive e-commerce storefront modeled on Allbirds, backed by an EmDash CMS backend (Astro on Cloudflare Workers + D1) and covered by a comprehensive Playwright E2E test suite.
 
 - **Live Storefront Demo**: [https://allbirds-storefront.vercel.app](https://allbirds-storefront.vercel.app)
 - **GitHub Repository**: [https://github.com/hthmkt12/allbirds-storefront](https://github.com/hthmkt12/allbirds-storefront)
@@ -13,14 +13,14 @@ An interactive e-commerce storefront modeled on Allbirds, backed by a local [Pay
 ## Architecture
 
 ```
-F:/Allbirds/
+Allbirds/
 ├── src/                  # React + Vite storefront (port 5173)
 │   ├── App.tsx           # Root: cart state, drawer, routing
 │   ├── components/       # UI sections (header, hero, product, cart…)
 │   ├── data/             # Local mock fallback data
-│   └── utils/cms-client  # Payload CMS HTTP client with fallback
-├── payload-cms/          # Payload CMS (Next.js, SQLite, port 3000)
-│   └── src/collections/  # 6 CMS collections
+│   └── utils/cms-client  # CMS HTTP client with fallback
+├── emdash-backend/       # EmDash CMS (Astro on Cloudflare Workers + D1) — active backend
+├── payload-cms/          # Payload CMS (SQLite) — deprecated, legacy reference only
 ├── e2e-tests/            # Playwright test suite (Tiers 1–5)
 ├── public/               # Static assets + WebP/AVIF optimised images
 └── docs/                 # common-issues.md, codebase notes
@@ -29,11 +29,11 @@ F:/Allbirds/
 | Layer | Technology |
 |---|---|
 | Frontend | React 19, Vite, TypeScript |
-| CMS | Payload CMS 3 (Next.js 15), SQLite |
+| CMS | EmDash (Astro) on Cloudflare Workers + D1 |
 | Styling | Vanilla CSS (custom properties) |
 | Images | WebP + AVIF `srcset` at 480/768/1024/1280/1536/1920 px |
 | Tests | Playwright (Chromium, Mobile Chrome, Mobile Safari) |
-| Deployment | Vercel / Cloudflare Pages (Frontend), Node.js (Payload CMS) |
+| Deployment | Vercel / Cloudflare Pages (Frontend), Cloudflare Workers (CMS) |
 
 ---
 
@@ -46,23 +46,24 @@ F:/Allbirds/
 npm install
 
 # CMS
-cd payload-cms
-npm install
+cd emdash-backend
+bun install
 cd ..
 ```
 
-### 2. Start Payload CMS
+### 2. CMS backend (EmDash)
 
-```bash
-cd payload-cms
-npm run dev          # http://localhost:3000
+By default the storefront targets the deployed edge backend:
+
+```
+https://allbirds-emdash-backend.worldnew.workers.dev
 ```
 
-On first run, visit `http://localhost:3000/admin` to create an admin user.  
-Seed the database with sample data:
+To run the CMS locally instead, start the EmDash backend and point the storefront at it via `VITE_CMS_URL`:
 
 ```bash
-npm run payload seed  # inside payload-cms/
+cd emdash-backend
+bun dev              # local Astro dev server
 ```
 
 ### 3. Start the storefront (dev)
@@ -71,13 +72,15 @@ npm run payload seed  # inside payload-cms/
 npm run dev          # http://localhost:5173
 ```
 
-> The storefront fetches from `http://127.0.0.1:3000/api/*` and falls back to local mock data if the CMS is unreachable.
+> The storefront fetches from `${VITE_CMS_URL}/api/*` (defaulting to the deployed Workers backend) and falls back to local mock data if the CMS is unreachable.
+>
+> **Legacy:** the `payload-cms/` folder holds the original Payload CMS + SQLite backend and is deprecated — kept for reference only.
 
 ---
 
 ## Available Scripts
 
-### Storefront (`F:/Allbirds/`)
+### Storefront (repo root)
 
 | Command | Description |
 |---|---|
@@ -87,12 +90,13 @@ npm run dev          # http://localhost:5173
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve production build on port 5173 |
 
-### CMS (`F:/Allbirds/payload-cms/`)
+### CMS (`emdash-backend/`)
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start Payload CMS dev server |
-| `npm run build` | Build CMS for production |
+| `bun dev` | Start EmDash (Astro) dev server |
+| `bun run build` | Build CMS for production |
+| `bunx wrangler deploy` | Deploy the CMS to Cloudflare Workers |
 
 ---
 
@@ -146,7 +150,7 @@ npx playwright test -c e2e-tests/playwright.config.ts --ui
 
 ## Deployment
 
-See [`docs/deployment-guide.md`](docs/deployment-guide.md) for step-by-step instructions on deploying the storefront to **Vercel** / **Cloudflare Pages** and Payload CMS to any Node.js environment.
+See [`docs/deployment-guide.md`](docs/deployment-guide.md) for step-by-step instructions on deploying the storefront to **Vercel** / **Cloudflare Pages** and the EmDash CMS backend to **Cloudflare Workers** (with a D1 database).
 
 ---
 
@@ -158,4 +162,7 @@ See [`docs/common-issues.md`](docs/common-issues.md) for a log of past bugs, roo
 
 ## Project Status
 
-All 7 milestones complete. See [`PROJECT.md`](PROJECT.md) for the milestone table.
+Mock-first storefront: the frontend and E2E suite are complete, but the CMS
+backend does not yet serve the content APIs, so the app runs on local mock data
+via fallback. See [`PROJECT.md`](PROJECT.md) for the milestone table and backend
+status, and [`docs/common-issues.md`](docs/common-issues.md) for details.

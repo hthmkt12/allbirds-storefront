@@ -51,6 +51,12 @@ describe("mapCategoryDoc", () => {
   it("derives a slug from the name when missing", () => {
     expect(mapCategoryDoc({ name: "Best Sellers", cta: "", swatch: "" }).slug).toBe("best-sellers");
   });
+
+  it("degrades a missing name to empty strings without throwing", () => {
+    const result = mapCategoryDoc({ cta: "", swatch: "" });
+    expect(result.name).toBe("");
+    expect(result.slug).toBe("");
+  });
 });
 
 describe("mapReviewDoc", () => {

@@ -30,7 +30,7 @@ function deriveOptions(products: CmsProduct[]) {
   for (const p of products) {
     (p.sizes || DEFAULT_SIZES).forEach((s) => sizes.add(s));
     const cws = p.colorways && p.colorways.length ? p.colorways : [{ color: p.color || "" }];
-    cws.forEach((cw: any) => cw.color && colors.add(cw.color));
+    cws.forEach((cw: { color?: string }) => cw.color && colors.add(cw.color));
     (p.tags || []).forEach((t) => tags.add(t));
     const price = parseFloat((p.price || "0").replace(/[^0-9.]/g, ""));
     if (price > maxPrice) maxPrice = price;
@@ -55,7 +55,7 @@ export function applyFiltersAndSort(
 
     if (filters.colors.length > 0) {
       const cws = p.colorways && p.colorways.length ? p.colorways : [{ color: p.color || "" }];
-      const productColors = cws.map((cw: any) => cw.color);
+      const productColors = cws.map((cw: { color?: string }) => cw.color);
       if (!filters.colors.some((c) => productColors.includes(c))) return false;
     }
 

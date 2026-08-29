@@ -63,7 +63,7 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.map((item: any) => ({
+          return parsed.map((item: Partial<CartItem>) => ({
             id: item.id || `${item.name}-${item.size}-${item.color}`,
             name: item.name || "Unknown Item",
             price: item.price || "$0",

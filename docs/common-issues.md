@@ -478,6 +478,33 @@ After every bug fix, append a new entry using this format:
 - `npm ls sharp` → sharp@0.35.4. `git check` confirmed `.env.example` still tracked.
 - `npm run build` clean (exit 0). `npm test` → 56/56 passed. `npm run lint` clean. `npm audit` → 1 low remaining.
 
+## 2026-08-29 - EmDash backend missing all content APIs; storefront silently runs on mock data
 
+### Symptoms
+- Storefront displays content but always from local mock fallback, never live CMS data.
+- Order history lookup returns nothing for any email.
+- No visible error: the app degrades silently to mock data on every fetch.
+
+### Root Cause
+- The deployed EmDash backend (`https://allbirds-emdash-backend.worldnew.workers.dev`) serves the root page (200) but returns 404 for every data route the frontend calls.
+- `emdash-backend/src/pages/` implements only one API route: `api/orders/lookup.ts`, and that route returns a hardcoded empty result (`{ docs: [] }`, not wired to D1).
+- The six content endpoints the frontend expects in `src/utils/cms-client/collections.ts` do not exist on the backend: `/api/hero-blocks`, `/api/categories`, `/api/products`, `/api/promo-tiles`, `/api/materials`, `/api/reviews`.
+- The order-create endpoint `POST /api/orders` used by `src/utils/cms-client/orders.ts` also does not exist.
+- Net effect: the "API Integration" milestone is DONE only on the frontend/client side; the active backend does not fulfill the API contract in PROJECT.md.
+
+### Common Triggers
+- Loading the storefront against the default `CMS_BASE_URL` (deployed Workers endpoint) with no `VITE_CMS_URL` override.
+- Any `GET ${CMS_BASE_URL}/api/*` content request; any checkout order submission.
+
+### Solutions
+- NOT YET FIXED (analysis only, per owner decision). Options to resolve, in scope order:
+  1. Implement the six content routes + `POST /api/orders` in `emdash-backend/src/pages/api/`, backed by the D1 database (`allbirds-emdash-db`), and seed it (`emdash-backend/seed-allbirds.ts`).
+  2. Wire `api/orders/lookup.ts` to read real orders from D1 instead of returning `{ docs: [] }`.
+  3. If the backend is intentionally deferred, update PROJECT.md/README to state the storefront currently runs on mock data and the content APIs are not yet served.
+
+### Verification
+- Observed via `Invoke-WebRequest`: `GET /` -> 200 (HTML); `GET /api/products`, `/api/hero-blocks`, `/api/categories`, `/api/orders` -> 404.
+- Confirmed by inspection: `emdash-backend/src/pages/api/` contains only `orders/lookup.ts`; that handler returns a hardcoded empty `docs` array.
+- Frontend contract confirmed in `src/utils/cms-client/collections.ts` (6 GET endpoints) and `src/utils/cms-client/orders.ts` (POST `/api/orders`, GET `/api/orders/lookup`).
 
 

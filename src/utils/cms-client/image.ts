@@ -1,6 +1,15 @@
 import { CMS_BASE_URL } from "../commerce-config";
 import { CmsProduct } from "./types";
 
+type ImageInput =
+  | string
+  | {
+      url?: string;
+      sizes?: Record<string, { url?: string } | undefined>;
+    }
+  | null
+  | undefined;
+
 export function resolveCmsUrl(url: string | undefined | null): string {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("//")) {
@@ -9,7 +18,7 @@ export function resolveCmsUrl(url: string | undefined | null): string {
   return `${CMS_BASE_URL}${url}`;
 }
 
-export function getImageUrl(image: any): string {
+export function getImageUrl(image: ImageInput): string {
   if (!image) return "";
   if (typeof image === "string") return resolveCmsUrl(image);
   if (image && typeof image === "object" && typeof image.url === "string") {
@@ -18,7 +27,7 @@ export function getImageUrl(image: any): string {
   return "";
 }
 
-export function getImageSrcSet(image: any): { src: string; srcSet: string } {
+export function getImageSrcSet(image: ImageInput): { src: string; srcSet: string } {
   const defaultUrl = getImageUrl(image);
   if (!image || typeof image === "string") {
     return { src: defaultUrl, srcSet: "" };

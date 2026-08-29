@@ -1,8 +1,8 @@
 import React from 'react';
-import { getImageSrcSet } from '../utils/cms-client';
+import { getImageSrcSet, CmsMedia } from '../utils/cms-client';
 
 interface ResponsiveImageProps {
-  image: any;
+  image: CmsMedia | string | null | undefined;
   alt?: string;
   className?: string;
   sizes?: string;

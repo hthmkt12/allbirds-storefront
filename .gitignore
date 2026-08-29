@@ -3,6 +3,11 @@ node_modules/
 payload-cms/node_modules/
 e2e-tests/node_modules/
 
+# Environment (never commit real secrets; .env.example is tracked)
+.env
+.env.local
+.env.*.local
+
 # Build output
 dist/
 payload-cms/dist/

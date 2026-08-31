@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { jsonResponse, errorResponse, privateCorsHeaders } from "../../../lib/cors";
 import { getDb } from "../../../lib/db";
+import { computeOrderTotals, parsePrice } from "../../../lib/pricing";
 
 export const prerender = false;
 
@@ -62,10 +63,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // 2. Compute totals server-side. Never trust the client-supplied subtotal.
   // Prices are taken from the authoritative catalog by product name; unknown
   // items (e.g. legacy carts) fall back to the parsed line price so valid
-  // orders are never rejected.
-  const parsePrice = (raw: string | undefined): number =>
-    parseFloat((raw || "").replace(/[^0-9.]/g, "")) || 0;
-
+  // orders are never rejected. See lib/pricing.ts for the pure logic + tests.
   const priceByName = new Map<string, number>();
   try {
     const { results } = await db.prepare("SELECT name, price FROM products").all();
@@ -77,23 +75,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     console.error("orders: failed to load authoritative prices", err);
   }
 
-  const unitPrice = (item: OrderItemInput): number => {
-    const authoritative = priceByName.get(item.name);
-    return typeof authoritative === "number" && authoritative > 0
-      ? authoritative
-      : parsePrice(item.price);
-  };
-
-  const subtotal = Math.round(
-    body.items.reduce((sum, item) => sum + unitPrice(item) * (item.quantity || 1), 0) * 100,
-  ) / 100;
-
-  // Keep these aligned with the storefront's commerce-config (TAX_RATE,
-  // FREE_SHIPPING_THRESHOLD, SHIPPING_FLAT) so the server total matches the
-  // amount the customer sees and pays; the webhook verifies that amount.
-  const tax = Math.round(subtotal * 0.08 * 100) / 100;
-  const shipping = subtotal >= 150 ? 0 : 7.5;
-  const total = Math.round((subtotal + tax + shipping) * 100) / 100;
+  const { subtotal, tax, shipping, total } = computeOrderTotals(body.items, priceByName);
 
   const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `order-${Date.now()}`;
   const orderToken = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `token-${Date.now()}`;

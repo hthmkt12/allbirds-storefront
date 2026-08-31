@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@astrojs/cloudflare": "^14.2.5",
-    "@emdash-cms/cloudflare": "^0.35.0"
+    "@emdash-cms/cloudflare": "^0.35.0",
+    "vitest": "^4.1.10"
   }
 }

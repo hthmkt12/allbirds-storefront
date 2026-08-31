@@ -33,6 +33,27 @@ jobs:
       - name: Production Build
         run: npm run build
 
+  backend-ci:
+    name: EmDash Backend Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Backend Dependencies
+        working-directory: ./emdash-backend
+        run: npm install
+
+      - name: Run Unit Tests (Vitest)
+        working-directory: ./emdash-backend
+        run: npm test
+
   cms-ci:
     name: Payload CMS Build
     runs-on: ubuntu-latest

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { jsonResponse, errorResponse, privateCorsHeaders } from "../../../lib/cors";
 import { getDb } from "../../../lib/db";
+import { isAuthorized, resolvePaymentStatus, amountMatches, orderStatusFor } from "../../../lib/payment";
 // @ts-ignore - provided by the Cloudflare Workers runtime
 import { env as cfEnv } from "cloudflare:workers";
 
@@ -22,17 +23,6 @@ function getWebhookSecret(locals?: any): string | null {
   const fromLocals = locals && typeof locals === "object" ? locals.PAYMENT_WEBHOOK_SECRET : undefined;
   if (typeof fromLocals === "string" && fromLocals.length > 0) return fromLocals;
   return null;
-}
-
-/** Length-independent constant-time string comparison. */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (typeof a !== "string" || typeof b !== "string") return false;
-  const len = Math.max(a.length, b.length);
-  let mismatch = a.length === b.length ? 0 : 1;
-  for (let i = 0; i < len; i++) {
-    mismatch |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-  }
-  return mismatch === 0;
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -58,14 +48,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   // Authenticate the payment provider before trusting any field in the payload.
-  if (typeof body.secretKey !== "string" || !timingSafeEqual(body.secretKey, secret)) {
+  if (!isAuthorized(body.secretKey, secret)) {
     return errorResponse("Unauthorized", 401, cors);
   }
 
   const { orderId, orderToken } = body;
-  const paymentStatus = body.paymentStatus === "failed" || body.paymentStatus === "unpaid"
-    ? body.paymentStatus
-    : "paid";
+  const paymentStatus = resolvePaymentStatus(body.paymentStatus);
 
   if (!orderId && !orderToken) {
     return errorResponse("Either orderId or orderToken is required", 400, cors);
@@ -82,14 +70,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // A "paid" confirmation must match the server-computed total to the cent.
-    if (paymentStatus === "paid") {
-      if (typeof body.amount !== "number" || Math.abs(body.amount - order.total) > 0.01) {
-        return errorResponse("Payment amount does not match order total", 400, cors);
-      }
+    if (paymentStatus === "paid" && !amountMatches(body.amount, order.total)) {
+      return errorResponse("Payment amount does not match order total", 400, cors);
     }
 
     const nowIso = new Date().toISOString();
-    const newStatus = paymentStatus === "paid" ? "confirmed" : "pending";
+    const newStatus = orderStatusFor(paymentStatus);
     await db.prepare(`
       UPDATE orders
       SET payment_status = ?, status = ?, updated_at = ?

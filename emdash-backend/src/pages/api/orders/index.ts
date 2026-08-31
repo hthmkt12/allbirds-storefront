@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { jsonResponse, errorResponse } from "../../../lib/cors";
+import { jsonResponse, errorResponse, privateCorsHeaders } from "../../../lib/cors";
 import { getDb } from "../../../lib/db";
 
 export const prerender = false;
@@ -28,16 +28,17 @@ interface OrderInput {
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const cors = privateCorsHeaders(request, locals);
   const db = getDb(locals);
   if (!db) {
-    return errorResponse("Database unavailable", 503);
+    return errorResponse("Database unavailable", 503, cors);
   }
 
   let body: OrderInput;
   try {
     body = await request.json();
   } catch {
-    return errorResponse("Invalid JSON payload", 400);
+    return errorResponse("Invalid JSON payload", 400, cors);
   }
 
   // 1. Validation
@@ -49,25 +50,49 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const shippingZip = (body.shippingZip || "").trim();
 
   if (!email || !email.includes("@")) {
-    return errorResponse("Valid email is required", 400);
+    return errorResponse("Valid email is required", 400, cors);
   }
   if (!shippingName || !shippingAddress || !shippingCity || !shippingState || !shippingZip) {
-    return errorResponse("All shipping fields are required", 400);
+    return errorResponse("All shipping fields are required", 400, cors);
   }
   if (!Array.isArray(body.items) || body.items.length === 0) {
-    return errorResponse("Order must include at least one item", 400);
+    return errorResponse("Order must include at least one item", 400, cors);
   }
 
-  // 2. Compute totals
-  const subtotal = typeof body.subtotal === "number" && body.subtotal >= 0
-    ? body.subtotal
-    : body.items.reduce((sum, item) => {
-        const num = parseFloat((item.price || "").replace(/[^0-9.]/g, "")) || 0;
-        return sum + num * (item.quantity || 1);
-      }, 0);
+  // 2. Compute totals server-side. Never trust the client-supplied subtotal.
+  // Prices are taken from the authoritative catalog by product name; unknown
+  // items (e.g. legacy carts) fall back to the parsed line price so valid
+  // orders are never rejected.
+  const parsePrice = (raw: string | undefined): number =>
+    parseFloat((raw || "").replace(/[^0-9.]/g, "")) || 0;
 
+  const priceByName = new Map<string, number>();
+  try {
+    const { results } = await db.prepare("SELECT name, price FROM products").all();
+    for (const row of (results || []) as Array<{ name: string; price: string }>) {
+      priceByName.set(row.name, parsePrice(row.price));
+    }
+  } catch (err: any) {
+    // If the catalog is unavailable we degrade to client line prices below.
+    console.error("orders: failed to load authoritative prices", err);
+  }
+
+  const unitPrice = (item: OrderItemInput): number => {
+    const authoritative = priceByName.get(item.name);
+    return typeof authoritative === "number" && authoritative > 0
+      ? authoritative
+      : parsePrice(item.price);
+  };
+
+  const subtotal = Math.round(
+    body.items.reduce((sum, item) => sum + unitPrice(item) * (item.quantity || 1), 0) * 100,
+  ) / 100;
+
+  // Keep these aligned with the storefront's commerce-config (TAX_RATE,
+  // FREE_SHIPPING_THRESHOLD, SHIPPING_FLAT) so the server total matches the
+  // amount the customer sees and pays; the webhook verifies that amount.
   const tax = Math.round(subtotal * 0.08 * 100) / 100;
-  const shipping = subtotal >= 50 ? 0 : 5;
+  const shipping = subtotal >= 150 ? 0 : 7.5;
   const total = Math.round((subtotal + tax + shipping) * 100) / 100;
 
   const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `order-${Date.now()}`;
@@ -75,7 +100,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const nowIso = new Date().toISOString();
   const status = "pending";
   const paymentMethod = body.paymentMethod || "card";
-  const paymentStatus = body.paymentStatus || "paid";
+  // Orders are always created unpaid. Payment is confirmed only via the
+  // authenticated /api/orders/webhook endpoint, never by the client.
+  const paymentStatus = "unpaid";
 
   // 3. Prepare Batch statements for D1
   try {
@@ -131,8 +158,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       updatedAt: nowIso,
     };
 
-    return jsonResponse({ doc }, 201);
+    return jsonResponse({ doc }, 201, cors);
   } catch (err: any) {
-    return errorResponse(err.message || "Failed to create order", 500);
+    console.error("orders: failed to create order", err);
+    return errorResponse("Failed to create order", 500, cors);
   }
 };

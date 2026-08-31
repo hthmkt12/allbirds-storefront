@@ -527,5 +527,35 @@ After every bug fix, append a new entry using this format:
 - Executed `curl` against `https://allbirds-emdash-backend.worldnew.workers.dev/api/orders/lookup` (HTTP 200 OK).
 - Ran all Playwright E2E tests (`npx playwright test`) and Vitest suites (56/56 passed).
 
+## 2026-08-31 - EmDash orders/payment endpoints trusted client-supplied money and auth
+
+### Symptoms
+- A client could create a "paid" order for $0: `POST /api/orders` accepted a client `subtotal` (e.g. `0`) and a client `paymentStatus` that defaulted to `"paid"`.
+- `POST /api/orders/webhook` marked any order `paid`/`confirmed` given only its `orderId`/`orderToken` — the declared `secretKey` field was never validated and the amount was never checked.
+- All order endpoints returned raw `err.message`, leaking internal detail; CORS was `Access-Control-Allow-Origin: *` on endpoints returning PII (email + shipping address).
+
+### Root Cause
+- `orders/index.ts` used `body.subtotal` verbatim and defaulted `payment_status` to `"paid"`; line prices came from the client.
+- `orders/webhook.ts` performed the paid/confirmed UPDATE with no authentication and no amount verification.
+- Shared `lib/cors.ts` hard-coded a wildcard origin and error helpers echoed exception messages.
+
+### Common Triggers
+- Any direct POST to `/api/orders` or `/api/orders/webhook` (e.g. from devtools, curl, or a malicious page holding an order token).
+
+### Solutions
+- `orders/webhook.ts`: require `PAYMENT_WEBHOOK_SECRET` (fail closed with 503 if unset), constant-time compare `secretKey`, and verify `amount` matches the server `order.total` (±0.01) before setting `paid`/`confirmed`.
+- `orders/index.ts`: compute `subtotal` server-side from authoritative catalog prices looked up by product name (fallback to parsed line price for unknown items); always create orders as `unpaid`/`pending`; align tax/shipping (0.08 / free ≥ 150 / $7.5 flat) with the storefront `commerce-config`.
+- `lib/cors.ts`: added `privateCorsHeaders(request, locals)` — an env-gated allowlist (`ALLOWED_ORIGINS`). Default stays `*` (no breakage); setting the env var reflects only allowlisted origins on `orders` / `orders/lookup` / `orders/webhook`. Content GET endpoints remain public.
+- All order endpoints now return generic error messages and log the real error server-side.
+
+### Operational notes
+- Set the webhook secret before relying on payment confirmation: `npx wrangler secret put PAYMENT_WEBHOOK_SECRET` (in `emdash-backend`). Until set, the webhook returns 503 and no order can be marked paid.
+- To enforce CORS, set `ALLOWED_ORIGINS` (comma-separated) to the storefront origin(s), e.g. the Cloudflare Pages `allbirds-storefront` domain. Note: these routes do not define an `OPTIONS` handler, so verify browser preflight before enforcing in production.
+- Behavior change: orders now display `unpaid` until an authenticated webhook confirms payment. No client code currently calls the webhook (the QR "waiting for confirmation" is a mock), so a real payment provider must POST to it with the secret + amount.
+
+### Verification
+- Not yet build-verified: `astro check` requires `@astrojs/check` + `typescript`, not installed in `emdash-backend`. Run `npm i -D @astrojs/check typescript` then `npx astro check` there to typecheck.
+- Manual review confirmed all SQL remains parameterized and the default (unset `ALLOWED_ORIGINS`) preserves existing CORS behavior.
+
 
 

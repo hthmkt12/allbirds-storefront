@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { jsonResponse, errorResponse } from "../../../lib/cors";
+import { jsonResponse, errorResponse, privateCorsHeaders } from "../../../lib/cors";
 import { getDb } from "../../../lib/db";
 
 export const prerender = false;
@@ -36,12 +36,13 @@ interface OrderItemRow {
 }
 
 export const GET: APIRoute = async ({ request, locals }) => {
+  const cors = privateCorsHeaders(request, locals);
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
   const token = url.searchParams.get("token");
 
   if (!email || !token) {
-    return errorResponse("Missing email or token", 400);
+    return errorResponse("Missing email or token", 400, cors);
   }
 
   const cleanEmail = email.trim().toLowerCase();
@@ -49,7 +50,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
   const db = getDb(locals);
   if (!db) {
-    return errorResponse("Database unavailable", 503);
+    return errorResponse("Database unavailable", 503, cors);
   }
 
   try {
@@ -59,7 +60,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       .first();
 
     if (!orderResult) {
-      return jsonResponse({ docs: [] });
+      return jsonResponse({ docs: [] }, 200, cors);
     }
 
     const order = orderResult as OrderRow;
@@ -100,8 +101,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
       updatedAt: order.updated_at,
     };
 
-    return jsonResponse({ docs: [doc] });
+    return jsonResponse({ docs: [doc] }, 200, cors);
   } catch (err: any) {
-    return errorResponse(err.message || "Failed to lookup order", 500);
+    console.error("orders/lookup: failed to lookup order", err);
+    return errorResponse("Failed to lookup order", 500, cors);
   }
 };

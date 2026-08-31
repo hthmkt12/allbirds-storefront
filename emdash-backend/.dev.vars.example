@@ -1,0 +1,15 @@
+﻿# Local development secrets for `wrangler dev`.
+# Copy this file to `.dev.vars` (which is gitignored) and fill in real values.
+# In production these are set with: npx wrangler secret put <NAME>
+#
+# The D1 database ("DB") is bound in wrangler.jsonc, not here.
+
+# Shared secret the payment provider must send as `secretKey` in the webhook body.
+# /api/orders/webhook fails closed (503) until this is set. Any non-empty string
+# works locally; use the real provider secret in production.
+PAYMENT_WEBHOOK_SECRET="dev-webhook-secret-change-me"
+
+# Comma-separated allowlist of storefront origin(s) allowed to call the
+# PII/mutation endpoints (orders create / lookup / webhook). When unset, CORS
+# stays permissive ("*"); set it to lock those endpoints down.
+ALLOWED_ORIGINS="http://localhost:4321,http://127.0.0.1:4321"

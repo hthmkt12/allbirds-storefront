@@ -146,7 +146,7 @@ test.describe('F1: Product Options Selection and Details', () => {
     await expect(pdpTitle).toHaveText("Men's Canvas Runner NZ");
 
     // 3. Select size 9
-    const sizeBtn = page.locator('button.size-button:has-text("9")');
+    const sizeBtn = page.getByRole('button', { name: /^Size 9(,.*)?$/ });
     await expect(sizeBtn).toBeVisible();
     await sizeBtn.click({ force: true });
 

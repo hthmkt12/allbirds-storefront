@@ -1,4 +1,4 @@
-export async function fetchWithTimeout(resource: string, options: RequestInit = {}, timeout = 2000): Promise<Response> {
+export async function fetchWithTimeout(resource: string, options: RequestInit = {}, timeout = 4000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {

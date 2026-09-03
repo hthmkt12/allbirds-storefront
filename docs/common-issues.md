@@ -557,5 +557,28 @@ After every bug fix, append a new entry using this format:
 - Not yet build-verified: `astro check` requires `@astrojs/check` + `typescript`, not installed in `emdash-backend`. Run `npm i -D @astrojs/check typescript` then `npx astro check` there to typecheck.
 - Manual review confirmed all SQL remains parameterized and the default (unset `ALLOWED_ORIGINS`) preserves existing CORS behavior.
 
+## 2026-09-04 - Storefront CMS Client timeout raised and integration test coverage
+
+### Symptoms
+- During Cloudflare Worker cold-starts (Astro + D1 init ~1.2s - 1.5s), storefront requests to `https://allbirds-emdash-backend.worldnew.workers.dev/api/*` risked premature abort under the 2000ms threshold, causing silent fallback to mock data.
+
+### Root Cause
+- `src/utils/cms-client/fetch.ts` had a rigid `timeout = 2000ms`, which left narrow margins for edge D1 cold-starts and network latency.
+- There was no dedicated test suite asserting `collections.ts` in-memory caching and fallback behavior.
+
+### Common Triggers
+- Initial page visits or waking idle Cloudflare Worker instances from global regions.
+
+### Solutions
+- Raised default timeout from 2000ms to 4000ms in `fetchWithTimeout`.
+- Added unit and integration tests in `src/utils/cms-client/collections.test.ts` validating API response caching, graceful degradation on network error, and empty-docs resilience.
+- Updated `PROJECT.md` Milestone 3 to DONE and documented live edge active status.
+
+### Verification
+- `npm test`: 59/59 tests passed across 9 test suites.
+- `npm run build`: 0 TypeScript / bundling errors.
+- Verified live D1 edge endpoints responding with HTTP 200 across all 6 collections.
+
+
 
 

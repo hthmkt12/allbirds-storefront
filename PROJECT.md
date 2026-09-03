@@ -17,22 +17,15 @@
 |---|------|-------|--------------|--------|-----------------|
 | 1 | E2E Testing Track | Build test runner, cases T1-T4, publish TEST_READY.md | None | DONE | 443a3f9d-eaf4-4341-a4fd-1fa4b2f4dae7 |
 | 2 | CMS Setup (M1) | Setup Payload CMS under `/payload-cms`, SQLite db, define 6 collections, seed data | None | DONE | 577ad584-709b-4d21-9e78-19dadf5947dd |
-| 3 | API Integration (M2) | Frontend CMS client + fetch/fallback wired to the API contract below | M1 | PARTIAL (frontend only) | 2eedaf07-3504-4419-a01c-ac22446490a9 |
+| 3 | API Integration (M2) | Frontend CMS client + fetch/fallback wired to the API contract below | M1 | DONE | 2eedaf07-3504-4419-a01c-ac22446490a9 |
 | 4 | PDP & Cart Drawer (M3) | Implement PDP selectors, Cart Drawer, item count edit/delete, price totals | M2 | DONE | 0d2f5db9-29ec-426d-9a6f-0aa5465d0d84 |
 | 5 | Brand Pages & Accessibility (M4) | Collection pages, Brand story, accessibility fixes, skip link, keyboard focus | M3 | DONE | ee7299f7-3a91-43c3-97b4-bd8a62033126 |
 | 6 | Performance Polish (M5) | WebP/AVIF image generation, srcset, responsive images, remove sprite crops | M3 | DONE | bf8902d5-159a-429a-92f9-d7e8efcc9c9b |
 | 7 | Final E2E & Hardening (M6) | Pass all E2E tests, write Tier 5 adversarial tests, verify audits | M4, M5, M1 | DONE | 5835f5a7-d55b-44ac-9ca6-5de3411efc59 |
 
-## Backend Status (mock-first)
+## Backend Status (live edge active)
 
-The storefront is currently a mock-first application. The frontend CMS client
-(`src/utils/cms-client/`) implements the full API contract below with a
-built-in fallback to local mock data (`src/data/allbirds-data.ts`), but the
-active EmDash backend does not yet serve the content endpoints. As of
-2026-08-29, `GET /api/*` content routes return 404 and only
-`GET /api/orders/lookup` exists (returning an empty result). See
-`docs/common-issues.md` for details. The contract below is the target for a
-future backend; treat it as the client-side contract, not a live API.
+The EmDash CMS backend deployed to Cloudflare Workers (`https://allbirds-emdash-backend.worldnew.workers.dev`) actively serves all 6 content API routes backed by Cloudflare D1 (`hero-blocks`, `categories`, `products`, `materials`, `reviews`, `promo-tiles`) along with the orders subsystem. The frontend client (`src/utils/cms-client/`) consumes these live edge endpoints dynamically with an in-memory caching layer and a resilient 4000ms timeout fallback to local mock data (`src/data/allbirds-data.ts`).
 
 ## Interface Contracts
 ### CMS Collections & Fields

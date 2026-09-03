@@ -160,17 +160,73 @@
 			</p>
 
 			<div class="section-title">Available Endpoints</div>
-			<div class="endpoint-list">
-				<div class="endpoint-item">
-					<div class="endpoint-info">
-						<span class="method">GET</span>
-						<span class="path">/api/orders/lookup</span>
+				<div class="endpoint-list">
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/products</span>
+						</div>
+						<span class="meta">Product catalog with colorways & sizing</span>
 					</div>
-					<span class="meta">Order verification & status</span>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/categories</span>
+						</div>
+						<span class="meta">Storefront categories & navigation</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/hero-blocks</span>
+						</div>
+						<span class="meta">Editorial hero campaigns</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/materials</span>
+						</div>
+						<span class="meta">Natural materials & sustainability story</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/reviews</span>
+						</div>
+						<span class="meta">Customer reviews from the flock</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/promo-tiles</span>
+						</div>
+						<span class="meta">Seasonal promotional tiles</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method" style="background: #2563eb;">POST</span>
+							<span class="path">/api/orders</span>
+						</div>
+						<span class="meta">Create order & batch items</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method">GET</span>
+							<span class="path">/api/orders/lookup</span>
+						</div>
+						<span class="meta">Order verification & status</span>
+					</div>
+					<div class="endpoint-item">
+						<div class="endpoint-info">
+							<span class="method" style="background: #2563eb;">POST</span>
+							<span class="path">/api/orders/webhook</span>
+						</div>
+						<span class="meta">Payment confirmation webhook</span>
+					</div>
 				</div>
-			</div>
 
-			<div class="footer">
+				<div class="footer">
 				<span>Runtime: Cloudflare Workers</span>
 				<span>Database: Cloudflare D1 (allbirds-emdash-db)</span>
 			</div>

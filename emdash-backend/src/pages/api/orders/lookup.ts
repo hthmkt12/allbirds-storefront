@@ -39,7 +39,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
   const cors = privateCorsHeaders(request, locals);
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
-  const token = url.searchParams.get("token");
+  const token =
+    url.searchParams.get("token") ||
+    url.searchParams.get("orderId") ||
+    url.searchParams.get("id");
 
   if (!email || !token) {
     return errorResponse("Missing email or token", 400, cors);
@@ -55,8 +58,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
   try {
     const orderResult = await db
-      .prepare("SELECT * FROM orders WHERE email = ? AND order_token = ? LIMIT 1")
-      .bind(cleanEmail, cleanToken)
+      .prepare(
+        "SELECT * FROM orders WHERE email = ? AND (order_token = ? OR id = ?) LIMIT 1"
+      )
+      .bind(cleanEmail, cleanToken, cleanToken)
       .first();
 
     if (!orderResult) {

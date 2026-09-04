@@ -69,6 +69,11 @@ describe("OrderTrackingView", () => {
     expect(screen.getByText("$145.80")).toBeInTheDocument();
     expect(screen.getByText("In Transit")).toBeInTheDocument();
     expect(screen.getByText("Paid")).toBeInTheDocument();
+
+    const progressbar = screen.getByRole("progressbar", { name: /order fulfillment progress/i });
+    expect(progressbar).toBeInTheDocument();
+    expect(progressbar).toHaveAttribute("aria-valuenow", "2");
+    expect(progressbar).toHaveAttribute("aria-valuetext", "In Transit");
   });
 
   it("shows error alert when order is not found", async () => {

@@ -287,6 +287,12 @@ export function OrderTrackingView({
 
             <div
               className="tracking-stepper"
+              role="progressbar"
+              aria-label="Order fulfillment progress"
+              aria-valuemin={0}
+              aria-valuemax={ORDER_STEPS.length - 1}
+              aria-valuenow={currentStepIdx}
+              aria-valuetext={ORDER_STEPS[currentStepIdx]?.label || "Order Confirmed"}
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(4, 1fr)",

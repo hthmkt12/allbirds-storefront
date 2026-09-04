@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { ErrorBoundary } from "./components/error-boundary";
 import {
   CategoryStrip,
   Hero,
@@ -218,18 +219,20 @@ export default function App() {
     return (
       <>
         <SiteHeader {...headerProps} />
-        <Suspense
-          fallback={
-            <div className="checkout-view" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ textAlign: "center", color: "var(--iron)", padding: "48px" }}>
-                <div style={{ width: "32px", height: "32px", border: "3px solid var(--cloud)", borderTopColor: "var(--charcoal)", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
-                <p style={{ fontSize: "15px", fontWeight: 500 }}>Loading secure checkout...</p>
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div className="checkout-view" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ textAlign: "center", color: "var(--iron)", padding: "48px" }}>
+                  <div style={{ width: "32px", height: "32px", border: "3px solid var(--cloud)", borderTopColor: "var(--charcoal)", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+                  <p style={{ fontSize: "15px", fontWeight: 500 }}>Loading secure checkout...</p>
+                </div>
               </div>
-            </div>
-          }
-        >
-          <CheckoutView cart={cart} onNavigate={navigate} onClearCart={clearCart} />
-        </Suspense>
+            }
+          >
+            <CheckoutView cart={cart} onNavigate={navigate} onClearCart={clearCart} />
+          </Suspense>
+        </ErrorBoundary>
         {renderOverlays()}
       </>
     );
@@ -239,13 +242,15 @@ export default function App() {
     return (
       <>
         <SiteHeader {...headerProps} />
-        <ProductListingPage
-          slug={collectionSlug}
-          onAddToCart={addToCart}
-          onNavigate={navigate}
-          isInWishlist={isInWishlist}
-          onToggleWishlist={toggleWishlist}
-        />
+        <ErrorBoundary>
+          <ProductListingPage
+            slug={collectionSlug}
+            onAddToCart={addToCart}
+            onNavigate={navigate}
+            isInWishlist={isInWishlist}
+            onToggleWishlist={toggleWishlist}
+          />
+        </ErrorBoundary>
         <NewsletterFooter />
         {cartDrawer}
         {renderOverlays()}
@@ -257,13 +262,15 @@ export default function App() {
     return (
       <>
         <SiteHeader {...headerProps} />
-        <ProductDetailView
-          slug={productSlug}
-          onAddToCart={addToCart}
-          onNavigate={navigate}
-          isWishlisted={productSlug ? isInWishlist(productSlug) : false}
-          onToggleWishlist={toggleWishlist}
-        />
+        <ErrorBoundary>
+          <ProductDetailView
+            slug={productSlug}
+            onAddToCart={addToCart}
+            onNavigate={navigate}
+            isWishlisted={productSlug ? isInWishlist(productSlug) : false}
+            onToggleWishlist={toggleWishlist}
+          />
+        </ErrorBoundary>
         <NewsletterFooter />
         {cartDrawer}
         {renderOverlays()}

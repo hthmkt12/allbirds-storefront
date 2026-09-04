@@ -1,5 +1,11 @@
-// @ts-ignore - provided by the Cloudflare Workers runtime
-import { env as cfEnv } from "cloudflare:workers";
+// Cloudflare Workers runtime provides cloudflare:workers, but Node test runners (Vitest) do not.
+let cfEnv: any = undefined;
+try {
+  // @ts-ignore
+  cfEnv = (await import("cloudflare:workers")).env;
+} catch {
+  // Node / local test fallback
+}
 
 const BASE_HEADERS: Record<string, string> = {
   "Content-Type": "application/json",

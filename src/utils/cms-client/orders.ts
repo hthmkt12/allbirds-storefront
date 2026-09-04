@@ -1,6 +1,7 @@
 import { CMS_BASE_URL } from "../commerce-config";
 import { CmsOrder } from "./types";
 import { fetchWithTimeout } from "./fetch";
+import { recordDegradation } from "../telemetry";
 
 function readLocalOrders(): CmsOrder[] {
   try {
@@ -31,6 +32,7 @@ export async function createOrder(orderData: Omit<CmsOrder, 'id' | 'status' | 'c
     }
     throw new Error("Invalid order response structure from CMS");
   } catch (err) {
+    recordDegradation("cms_create_order", "fallback_to_local_storage", { error: String(err) });
     console.warn("Failed to create order in CMS, saving to local storage fallback", err);
     // Local fallback
     const mockOrder: CmsOrder = {

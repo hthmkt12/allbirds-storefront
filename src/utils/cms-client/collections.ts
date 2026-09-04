@@ -9,6 +9,7 @@ import { CMS_BASE_URL, DEFAULT_SIZES } from "../commerce-config";
 import { CmsCategory, CmsHeroBlock, CmsMaterial, CmsProduct, CmsPromoTile, CmsReview } from "./types";
 import { mapCategoryDoc, mapProductDoc, mapReviewDoc } from "./mappers";
 import { fetchWithTimeout } from "./fetch";
+import { recordDegradation } from "../telemetry";
 
 let heroBlocksCache: Promise<CmsHeroBlock[]> | null = null;
 let categoriesCache: Promise<CmsCategory[]> | null = null;
@@ -29,6 +30,7 @@ export function getHeroBlocks(): Promise<CmsHeroBlock[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_hero_blocks", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch hero blocks, using fallback", err);
         return [{
           headline: "Wildly Comfortable. Super Natural.",
@@ -54,6 +56,7 @@ export function getCategories(): Promise<CmsCategory[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_categories", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch categories, using fallback", err);
         return mockCategories.map((cat) => ({
           name: cat.name,
@@ -80,6 +83,7 @@ export function getProducts(): Promise<CmsProduct[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_products", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch products, using fallback", err);
         return mockProducts.map((prod) => ({
           name: prod.name,
@@ -116,6 +120,7 @@ export function getPromoTiles(): Promise<CmsPromoTile[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_promo_tiles", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch promo tiles, using fallback", err);
         return mockPromoTiles.map((tile) => ({
           title: tile.title,
@@ -140,6 +145,7 @@ export function getMaterials(): Promise<CmsMaterial[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_materials", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch materials, using fallback", err);
         return mockValueBlocks.map((vb) => ({
           name: vb.title,
@@ -163,6 +169,7 @@ export function getReviews(): Promise<CmsReview[]> {
         }
         throw new Error("Empty docs");
       } catch (err) {
+        recordDegradation("cms_reviews", "fallback_to_mock", { error: String(err) });
         console.warn("Failed to fetch reviews, using fallback", err);
         return mockReviews.map((rev) => ({
           quote: rev.quote,

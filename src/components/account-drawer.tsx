@@ -5,15 +5,19 @@ import { useDrawerA11y } from "../utils/use-drawer-a11y";
 interface AccountDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (path: string) => void;
 }
 
-export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
+export function AccountDrawer({ isOpen, onClose, onNavigate }: AccountDrawerProps) {
   const panelRef = useDrawerA11y(isOpen, onClose);
   const [customerEmail, setCustomerEmail] = useState<string | null>(() => {
     return localStorage.getItem("customer_email");
   });
   const [signInEmail, setSignInEmail] = useState("");
   const [signInError, setSignInError] = useState<string | null>(null);
+  const [lookupEmail, setLookupEmail] = useState("");
+  const [lookupOrderId, setLookupOrderId] = useState("");
+  const [lookupError, setLookupError] = useState<string | null>(null);
   const [orders, setOrders] = useState<CmsOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
@@ -130,6 +134,35 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
                           </div>
                         ))}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          if (onNavigate) {
+                            onNavigate(
+                              `/orders/track?email=${encodeURIComponent(
+                                order.email
+                              )}&orderId=${encodeURIComponent(
+                                order.orderToken || order.id
+                              )}`
+                            );
+                          }
+                        }}
+                        style={{
+                          marginTop: "12px",
+                          width: "100%",
+                          padding: "8px 12px",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          background: "none",
+                          border: "1px solid var(--line)",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          color: "var(--charcoal)",
+                        }}
+                      >
+                        Track Order
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -181,27 +214,68 @@ export function AccountDrawer({ isOpen, onClose }: AccountDrawerProps) {
               </button>
             </form>
 
-            {/* Order Lookup placeholder */}
-            <div style={{ borderTop: "1px solid var(--line)", paddingTop: "24px" }}>
+            {/* Order Lookup */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!lookupEmail.trim() || !lookupOrderId.trim()) {
+                  setLookupError("Please enter both email and order number.");
+                  return;
+                }
+                onClose();
+                if (onNavigate) {
+                  onNavigate(
+                    `/orders/track?email=${encodeURIComponent(
+                      lookupEmail.trim()
+                    )}&orderId=${encodeURIComponent(lookupOrderId.trim())}`
+                  );
+                }
+              }}
+              style={{ borderTop: "1px solid var(--line)", paddingTop: "24px" }}
+            >
               <h3 style={{ fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Order Lookup</h3>
               <p style={{ fontSize: "13px", color: "var(--iron)", marginBottom: "12px" }}>
-                Quickly check the status of a single order.
+                Quickly check fulfillment and tracking for a single order.
               </p>
+              <label htmlFor="order-lookup-email-input" className="sr-only">Email address</label>
+              <input
+                id="order-lookup-email-input"
+                type="email"
+                required
+                placeholder="Order email address..."
+                value={lookupEmail}
+                onChange={(e) => {
+                  setLookupEmail(e.target.value);
+                  if (lookupError) setLookupError(null);
+                }}
+                style={{ width: "100%", padding: "12px", fontSize: "14px", border: "1px solid var(--line)", borderRadius: "4px", boxSizing: "border-box", marginBottom: "8px" }}
+              />
               <label htmlFor="order-lookup-input" className="sr-only">Order number</label>
               <input
                 id="order-lookup-input"
                 type="text"
-                placeholder="Enter order number..."
-                style={{ width: "100%", padding: "12px", fontSize: "14px", border: "1px solid var(--line)", borderRadius: "4px", boxSizing: "border-box", marginBottom: "12px" }}
+                required
+                placeholder="Enter order number or token..."
+                value={lookupOrderId}
+                onChange={(e) => {
+                  setLookupOrderId(e.target.value);
+                  if (lookupError) setLookupError(null);
+                }}
+                style={{ width: "100%", padding: "12px", fontSize: "14px", border: "1px solid var(--line)", borderRadius: "4px", boxSizing: "border-box", marginBottom: lookupError ? "6px" : "12px" }}
               />
+              {lookupError && (
+                <p role="alert" style={{ color: "#c0392b", fontSize: "12px", margin: "0 0 12px 0" }}>
+                  {lookupError}
+                </p>
+              )}
               <button
-                type="button"
+                type="submit"
                 className="pill-button"
                 style={{ width: "100%", background: "var(--canvas)", border: "1px solid var(--charcoal)", fontWeight: 700 }}
               >
                 Look Up Order
               </button>
-            </div>
+            </form>
           </div>
         )}
       </div>

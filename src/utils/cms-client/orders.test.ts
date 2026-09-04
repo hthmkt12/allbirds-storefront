@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createOrder, getOrders } from "./orders";
+import { createOrder, getOrders, lookupOrder } from "./orders";
 import { CmsOrder } from "./types";
 
 const orderInput: Omit<CmsOrder, "id" | "status" | "createdAt" | "updatedAt"> = {
@@ -158,5 +158,65 @@ describe("getOrders", () => {
 
     const orders = await getOrders("test@example.com");
     expect(orders.map((o) => o.id)).toEqual(["local-1"]);
+  });
+});
+
+describe("lookupOrder", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("returns null when email or orderId is missing", async () => {
+    expect(await lookupOrder("", "order-123")).toBeNull();
+    expect(await lookupOrder("test@example.com", "")).toBeNull();
+  });
+
+  it("fetches single order from remote API and syncs to localStorage", async () => {
+    const remoteDoc = {
+      ...orderInput,
+      id: "ord-999",
+      orderToken: "tok-999",
+      status: "shipped",
+      createdAt: "2026-02-01",
+      updatedAt: "2026-02-02",
+    };
+
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: async () => ({ docs: [remoteDoc] }),
+    });
+
+    const result = await lookupOrder("test@example.com", "ord-999");
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe("ord-999");
+    expect(result?.status).toBe("shipped");
+
+    const cached = JSON.parse(localStorage.getItem("local_orders") || "[]");
+    expect(cached.some((o: any) => o.id === "ord-999")).toBe(true);
+  });
+
+  it("falls back to local order cache if network fails", async () => {
+    const cachedOrder = {
+      ...orderInput,
+      id: "ord-local-1",
+      orderToken: "tok-local-1",
+      status: "processing",
+      createdAt: "2026-02-01",
+      updatedAt: "2026-02-02",
+    };
+    localStorage.setItem("local_orders", JSON.stringify([cachedOrder]));
+
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("offline"));
+
+    const result = await lookupOrder("test@example.com", "ord-local-1");
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe("ord-local-1");
+    expect(result?.status).toBe("processing");
   });
 });

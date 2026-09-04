@@ -126,7 +126,7 @@ export function CheckoutView({ cart, onNavigate, onClearCart }: CheckoutViewProp
             setSubmitting(false);
           } else {
             try {
-              await createOrder({
+              const created = await createOrder({
                 email: form.email.trim(),
                 shippingName: form.fullName.trim(),
                 shippingAddress: form.address.trim(),
@@ -151,7 +151,12 @@ export function CheckoutView({ cart, onNavigate, onClearCart }: CheckoutViewProp
               });
 
               onClearCart();
-              onNavigate("/checkout/confirmation");
+              const targetOrderId = created.orderToken || created.id;
+              onNavigate(
+                `/checkout/confirmation?email=${encodeURIComponent(
+                  created.email
+                )}&orderId=${encodeURIComponent(targetOrderId)}`
+              );
             } catch (err) {
               console.error("Error creating order:", err);
               setPaymentError("Payment Failed: Error saving order");
@@ -167,7 +172,7 @@ export function CheckoutView({ cart, onNavigate, onClearCart }: CheckoutViewProp
 
         setTimeout(async () => {
           try {
-            await createOrder({
+            const created = await createOrder({
               email: form.email.trim(),
               shippingName: form.fullName.trim(),
               shippingAddress: form.address.trim(),
@@ -193,7 +198,12 @@ export function CheckoutView({ cart, onNavigate, onClearCart }: CheckoutViewProp
 
             onClearCart();
             setShowQrModal(false);
-            onNavigate("/checkout/confirmation");
+            const targetOrderId = created.orderToken || created.id;
+            onNavigate(
+              `/checkout/confirmation?email=${encodeURIComponent(
+                created.email
+              )}&orderId=${encodeURIComponent(targetOrderId)}`
+            );
           } catch (err) {
             console.error("Error creating order with QR:", err);
             setPaymentError("Error placing order. Please try again.");

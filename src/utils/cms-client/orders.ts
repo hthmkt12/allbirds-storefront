@@ -118,3 +118,61 @@ export async function getOrders(email: string): Promise<CmsOrder[]> {
     }
   ];
 }
+
+export async function lookupOrder(
+  email: string,
+  orderIdOrToken: string
+): Promise<CmsOrder | null> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanKey = orderIdOrToken.trim();
+
+  if (!cleanEmail || !cleanKey) {
+    return null;
+  }
+
+  // 1. Check local cache first
+  const localOrders = readLocalOrders();
+  const cached = localOrders.find(
+    (o) =>
+      o.email.trim().toLowerCase() === cleanEmail &&
+      (o.id === cleanKey || o.orderToken === cleanKey)
+  );
+
+  // 2. Fetch live status from edge API
+  try {
+    const res = await fetchWithTimeout(
+      `${CMS_BASE_URL}/api/orders/lookup?email=${encodeURIComponent(
+        cleanEmail
+      )}&token=${encodeURIComponent(cleanKey)}`
+    );
+
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`Status ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (Array.isArray(data?.docs) && data.docs.length > 0) {
+      const remoteOrder = data.docs[0] as CmsOrder;
+
+      // Sync into local_orders cache
+      const updatedList = localOrders.filter((o) => o.id !== remoteOrder.id);
+      updatedList.push(remoteOrder);
+      try {
+        localStorage.setItem("local_orders", JSON.stringify(updatedList));
+      } catch {
+        // Ignore storage errors
+      }
+
+      return remoteOrder;
+    }
+    return cached || null;
+  } catch (err) {
+    recordDegradation("cms_order_lookup", "fallback_to_local", {
+      email: cleanEmail,
+      key: cleanKey,
+      error: String(err),
+    });
+    return cached || null;
+  }
+}

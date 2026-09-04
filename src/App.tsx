@@ -35,6 +35,9 @@ const HelpDrawer = lazy(() =>
 const WishlistDrawer = lazy(() =>
   import("./components/wishlist-drawer").then((m) => ({ default: m.WishlistDrawer }))
 );
+const OrderTrackingView = lazy(() =>
+  import("./components/order-tracking-view").then((m) => ({ default: m.OrderTrackingView }))
+);
 
 export default function App() {
   const [audience, setAudience] = useState("Shop Men");
@@ -180,7 +183,7 @@ export default function App() {
   const renderOverlays = () => (
     <Suspense fallback={null}>
       <SearchDialog isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onNavigate={navigate} />
-      <AccountDrawer isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
+      <AccountDrawer isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} onNavigate={navigate} />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <WishlistDrawer
         isOpen={isWishlistOpen}
@@ -204,7 +207,14 @@ export default function App() {
     />
   );
 
-  if (currentPath === "/checkout/confirmation") {
+  // Determine route paths ignoring query strings
+  const routePath = currentPath.split("?")[0];
+
+  if (routePath === "/checkout/confirmation") {
+    const searchParams = new URLSearchParams(window.location.search);
+    const confirmedEmail = searchParams.get("email");
+    const confirmedOrderId = searchParams.get("orderId");
+
     return (
       <>
         <SiteHeader {...headerProps} />
@@ -212,25 +222,61 @@ export default function App() {
           <div className="confirmation-box">
             <h1 style={{ fontFamily: "var(--serif)", fontSize: "42px", marginBottom: "16px" }}>Thank You!</h1>
             <h2 style={{ color: "#5cb85c", marginBottom: "12px" }}>Order Placed Successfully!</h2>
-            <p style={{ fontSize: "16px", color: "var(--iron)", lineHeight: "1.6" }}>
+            <p style={{ fontSize: "16px", color: "var(--iron)", lineHeight: "1.6", marginBottom: "8px" }}>
               We have received your order and are preparing it for shipment.
             </p>
+            {confirmedOrderId && (
+              <p style={{ fontSize: "14px", color: "var(--charcoal)", fontWeight: 600 }}>
+                Order #{confirmedOrderId.slice(-8).toUpperCase()}
+              </p>
+            )}
           </div>
-          <button
-            type="button"
-            className="pill-button"
-            onClick={() => { clearCart(); navigate("/"); }}
-            style={{ background: "var(--charcoal)", color: "var(--canvas)", border: "none", cursor: "pointer" }}
-          >
-            Return to Storefront
-          </button>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            {confirmedEmail && confirmedOrderId && (
+              <button
+                type="button"
+                className="pill-button"
+                onClick={() => {
+                  clearCart();
+                  navigate(
+                    `/orders/track?email=${encodeURIComponent(
+                      confirmedEmail
+                    )}&orderId=${encodeURIComponent(confirmedOrderId)}`
+                  );
+                }}
+                style={{
+                  background: "var(--charcoal)",
+                  color: "var(--canvas)",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                }}
+              >
+                Track Order
+              </button>
+            )}
+            <button
+              type="button"
+              className="pill-button"
+              onClick={() => { clearCart(); navigate("/"); }}
+              style={{
+                background: "var(--canvas)",
+                color: "var(--charcoal)",
+                border: "1px solid var(--charcoal)",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Return to Storefront
+            </button>
+          </div>
         </div>
         {renderOverlays()}
       </>
     );
   }
 
-  if (currentPath === "/checkout") {
+  if (routePath === "/checkout") {
     return (
       <>
         <SiteHeader {...headerProps} />
@@ -248,6 +294,39 @@ export default function App() {
             <CheckoutView cart={cart} onNavigate={navigate} onClearCart={clearCart} />
           </Suspense>
         </ErrorBoundary>
+        {renderOverlays()}
+      </>
+    );
+  }
+
+  if (currentPath.startsWith("/orders/track")) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialEmail = urlParams.get("email") || "";
+    const initialOrderId = urlParams.get("orderId") || urlParams.get("token") || "";
+
+    return (
+      <>
+        <SiteHeader {...headerProps} />
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ textAlign: "center", color: "var(--iron)", padding: "48px" }}>
+                  <div style={{ width: "32px", height: "32px", border: "3px solid var(--cloud)", borderTopColor: "var(--charcoal)", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+                  <p style={{ fontSize: "15px", fontWeight: 500 }}>Loading order details...</p>
+                </div>
+              </div>
+            }
+          >
+            <OrderTrackingView
+              initialEmail={initialEmail}
+              initialOrderId={initialOrderId}
+              onNavigate={navigate}
+            />
+          </Suspense>
+        </ErrorBoundary>
+        <NewsletterFooter />
+        {cartDrawer}
         {renderOverlays()}
       </>
     );

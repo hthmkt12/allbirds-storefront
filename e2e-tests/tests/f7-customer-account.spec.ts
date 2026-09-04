@@ -21,7 +21,7 @@ test.describe('F7: Customer Account & Order History', () => {
     await expect(orderLookupHeading).toBeVisible();
 
     // 3. Perform Simulated Login
-    const emailInput = accountDrawer.locator('input[type="email"]');
+    const emailInput = accountDrawer.locator('#signin-email-input');
     await expect(emailInput).toBeVisible();
     await emailInput.fill('test-customer@example.com');
 

@@ -579,6 +579,37 @@ After every bug fix, append a new entry using this format:
 - `npm run build`: 0 TypeScript / bundling errors.
 - Verified live D1 edge endpoints responding with HTTP 200 across all 6 collections.
 
+## 2026-09-04 - Order Tracking UI, Route Isolation, and Edge D1 Lookup by Public ID
+
+### Symptoms
+- Customers completing checkout had no self-service tracking screen without signing in.
+- The Order Lookup form in `account-drawer.tsx` lacked validation and submit handling.
+- Edge API `/api/orders/lookup` only accepted `order_token` (UUID secret), rejecting lookup attempts using public order `id`.
+- Navigating to `/checkout/confirmation?email=...&orderId=...` broke client router exact equality checks, dropping users to the home storefront.
+
+### Root Cause
+- `emdash-backend/src/pages/api/orders/lookup.ts` SQL query was strictly `SELECT * FROM orders WHERE email = ? AND order_token = ? LIMIT 1`.
+- Router in `src/App.tsx` matched exact `currentPath === "/checkout/confirmation"` without stripping query strings.
+- Storefront lacked dedicated `/orders/track` route and order tracking stepper component.
+
+### Common Triggers
+- Guest customers clicking confirmation link or looking up status by public order ID in drawer.
+
+### Solutions
+- Upgraded `lookup.ts` to accept `token`, `orderId`, or `id`, querying `SELECT * FROM orders WHERE email = ? AND (order_token = ? OR id = ?) LIMIT 1`.
+- Built `OrderTrackingView` component with 4-step progress stepper (`pending` -> `processing` -> `shipped` -> `delivered`), line items, and shipping details.
+- Added client API `lookupOrder(email, orderIdOrToken)` with local cache fallback.
+- Added `/orders/track` route in `App.tsx` with query parameter pre-filling.
+- Isolated search query strings in `App.tsx` via `routePath = currentPath.split("?")[0]`.
+- Added "Track Order" direct CTA to `/checkout/confirmation` and customer drawer order history cards.
+- Deployed updated `emdash-backend` worker to Cloudflare Workers and verified live D1 query.
+
+### Verification
+- `npm --prefix emdash-backend test`: 22/22 unit tests passed.
+- `npm test`: 77/77 frontend unit tests passed across 12 suites.
+- Playwright E2E: 114/114 browser tests passed across Chromium Desktop and Mobile.
+- Live edge API verified via curl: `GET /api/orders/lookup?email=live-verify-customer@example.com&id=...` returned HTTP 200 with order document.
+
 
 
 

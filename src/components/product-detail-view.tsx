@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Star, Minus, Plus, ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { getProducts, getMaterials, getImageUrl, CmsProduct, CmsMaterial } from "../utils/cms-client";
 import { ResponsiveImage } from "./responsive-image";
 import { SizeGuideModal } from "./size-guide-modal";
 import { DEFAULT_SIZES } from "../utils/commerce-config";
+import { useSeoMetadata, buildProductJsonLd } from "../utils/seo";
 
 export interface ProductDetailViewProps {
   slug: string;
@@ -67,6 +68,20 @@ export function ProductDetailView({
         setLoading(false);
       });
   }, [slug]);
+
+  // Dynamic SEO & OpenGraph for Product
+  const rawImage = product?.colorways?.[colorwayIndex]?.image || product?.colorways?.[0]?.image;
+  const currentImage = rawImage ? getImageUrl(rawImage) : undefined;
+  const productJsonLd = useMemo(() => (product ? buildProductJsonLd(product) : undefined), [product]);
+
+  useSeoMetadata({
+    title: product ? `${product.name} - Sustainable Shoes` : "Product Details",
+    description: product?.description || (product ? `Shop the sustainable ${product.name} at Allbirds.` : undefined),
+    image: currentImage,
+    url: `/products/${slug}`,
+    type: "product",
+    jsonLd: productJsonLd,
+  });
 
   if (loading) {
     return (

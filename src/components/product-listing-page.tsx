@@ -3,6 +3,7 @@ import { getProducts, CmsProduct } from "../utils/cms-client";
 import { ProductCard } from "./commerce-sections";
 import { FilterSortBar, FilterState, SortKey, applyFiltersAndSort } from "./filter-sort-bar";
 import { SizeGuideModal } from "./size-guide-modal";
+import { useSeoMetadata } from "../utils/seo";
 
 // Map collection slugs to display labels and audience filters
 const COLLECTION_META: Record<
@@ -69,6 +70,14 @@ export function ProductListingPage({
 
   const collectionProducts = filterByCollection(allProducts, slug);
   const visibleProducts = applyFiltersAndSort(collectionProducts, filters, sort);
+
+  // Dynamic SEO & OpenGraph for Collection
+  useSeoMetadata({
+    title: `${meta.label} Shoes & Apparel`,
+    description: `Discover sustainable comfort in the Allbirds ${meta.label} collection. ${meta.hero}.`,
+    url: `/collections/${slug}`,
+    type: "website",
+  });
 
   return (
     <main className="plp-page">

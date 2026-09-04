@@ -17,6 +17,7 @@ import { ProductListingPage } from "./components/product-listing-page";
 import { CartDrawer, CartItem } from "./components/cart-drawer";
 import { ProductDetailView } from "./components/product-detail-view";
 import { useWishlist } from "./utils/use-wishlist";
+import { useSeoMetadata, BASE_STORE_TITLE, BASE_STORE_DESCRIPTION } from "./utils/seo";
 
 // Lazy-loaded components for bundle optimization
 const CheckoutView = lazy(() =>
@@ -109,6 +110,20 @@ export default function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  // Dynamic SEO for Home and Checkout confirmation
+  useSeoMetadata({
+    title: currentPath === "/checkout"
+      ? "Secure Checkout"
+      : currentPath === "/checkout/confirmation"
+      ? "Order Confirmed"
+      : BASE_STORE_TITLE,
+    description: currentPath.startsWith("/checkout")
+      ? "Complete your purchase securely at Allbirds."
+      : BASE_STORE_DESCRIPTION,
+    url: currentPath,
+    type: "website",
+  });
 
   const addToCart = (item: Omit<CartItem, 'id' | 'quantity'> & { quantity?: number }) => {
     const id = `${item.name}-${item.size}-${item.color}`;
